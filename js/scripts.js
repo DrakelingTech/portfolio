@@ -51,4 +51,8 @@ window.addEventListener('DOMContentLoaded', event => {
         });
     });
 
+    if(window.innerWidth < 512){
+        document.getElementById('emailAddress').placeholder = 'Email';
+    }
+
 });
