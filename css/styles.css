@@ -82,6 +82,12 @@
   --bs-link-hover-color: #50817e;
   --bs-code-color: #d63384;
   --bs-highlight-bg: #faf4e0;
+
+  
+}
+
+@media screen and (width > 400) {
+  --bs-black-rgb: 61, 122, 212;
 }
 
 *,
