@@ -629,6 +629,9 @@ output {
 }
 
 iframe {
+  width:100%;
+  height:auto;
+  background:transparent;
   border: 0;
 }
 
