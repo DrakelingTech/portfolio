@@ -26,7 +26,7 @@ window.addEventListener('DOMContentLoaded', event => {
     // Initialize carousels
     const carousel = document.querySelector("#carouselSNB");
     const overlay = document.getElementById("carouselOverlay");
-    const wrapper = document.getElementById("carouselWrapper");
+    const wrapper = document.getElementById("carousel-wrapper");
 
     let isZoomed = false;
 
@@ -85,9 +85,50 @@ function changePic(filepath) {
 };
 
 
+// function toggleZoom() {
+//   const wrapper = document.querySelector('.carousel-wrapper');
+//   const overlay = document.getElementById('carouselOverlay');
+//   wrapper.classList.toggle('zoomed');
+//   overlay.classList.toggle('active');
+// }
+
+let isZoomed = false; // Variable to track zoom state
+
+// Function to toggle zoom
 function toggleZoom() {
-  const wrapper = document.querySelector('.carousel-wrapper');
-  const overlay = document.getElementById('carouselOverlay');
-  wrapper.classList.toggle('zoomed');
-  overlay.classList.toggle('active');
+  const carouselWrapper = document.getElementById("carouselWrapper");
+
+  if (isZoomed) {
+    // If already zoomed, zoom out
+    carouselWrapper.classList.remove('zoomed');
+    isZoomed = false;
+  } else {
+    // If not zoomed, zoom in
+    carouselWrapper.classList.add('zoomed');
+    isZoomed = true;
+  }
 }
+
+// Prevent zoom on arrow clicks
+function preventZoomOnArrows(event) {
+  if (isZoomed) {
+    event.stopPropagation(); // Prevent zoom toggle when arrow is clicked
+  }
+}
+
+// Handle next/prev slide button clicks (exclude zoom effect)
+document.querySelector('.carousel-control-prev').addEventListener('click', (event) => {
+  preventZoomOnArrows(event);
+});
+
+document.querySelector('.carousel-control-next').addEventListener('click', (event) => {
+  preventZoomOnArrows(event);
+});
+
+// Handle image clicks to toggle zoom
+document.querySelectorAll('.carousel-item img').forEach(img => {
+  img.addEventListener('click', (event) => {
+    toggleZoom(); // Toggle zoom in or out on image click
+    event.stopPropagation(); // Prevent event bubbling to parent elements
+  });
+});
