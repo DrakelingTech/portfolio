@@ -7145,18 +7145,20 @@ fieldset:disabled .btn {
 
 // ChatGPT v6
 
+/* Modal container */
 #carouselModal {
   position: fixed;
   top: 0;
   left: 0;
+  width: 100vw;
+  height: 100vh;
   display: none;
   justify-content: center;
   align-items: center;
-  width: 100vw;
-  height: 100vh;
   z-index: 1050;
 }
 
+/* Modal backdrop */
 #modalBackdrop {
   position: absolute;
   width: 100%;
@@ -7165,10 +7167,11 @@ fieldset:disabled .btn {
   z-index: 1;
 }
 
+/* Modal content */
 #modalContent {
   position: relative;
   z-index: 2;
-  transition: transform 1s ease;
+  transition: transform 0.5s ease;
   max-width: 95vw;
   max-height: 90vh;
   overflow: hidden;
@@ -7182,15 +7185,18 @@ fieldset:disabled .btn {
   transform: scale(0.7);
 }
 
+/* Show modal with animation */
 #carouselModal.show #modalContent {
   transform: scale(1);
 }
 
+/* Carousel within modal */
 #modalContent .carousel {
   width: 100%;
   max-height: 100%;
 }
 
+/* Carousel images */
 .carousel-item img {
   max-width: 100%;
   max-height: 80vh;
@@ -7199,9 +7205,10 @@ fieldset:disabled .btn {
   margin: 0 auto;
 }
 
+/* Navigation buttons */
 .carousel-control-prev,
 .carousel-control-next {
-  top: calc(100% + 0.5rem); /* Move below the image */
+  top: calc(100% + 0.5rem); /* Position below the image */
   width: auto;
   height: auto;
   background: none;

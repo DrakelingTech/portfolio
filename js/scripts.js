@@ -161,36 +161,41 @@ function changePic(filepath) {
 // overlay.addEventListener('click', toggleCarouselExpansion);
 
 
+  const carousel = document.getElementById('carouselSNB');
+  const modal = document.getElementById('carouselModal');
+  const modalContent = document.getElementById('modalContent');
+  const modalBackdrop = document.getElementById('modalBackdrop');
 
-const carousel = document.getElementById('carouselSNB');
-const modal = document.getElementById('carouselModal');
-const modalContent = document.getElementById('modalContent');
-const modalBackdrop = document.getElementById('modalBackdrop');
+  let clonedCarousel = null;
 
-let clonedCarousel = null;
-
-function openModal() {
+  function openModal() {
     if (!clonedCarousel) {
-        clonedCarousel = carousel.cloneNode(true);
-        modalContent.appendChild(clonedCarousel);
+      clonedCarousel = carousel.cloneNode(true);
+      modalContent.appendChild(clonedCarousel);
     }
     modal.style.display = 'flex';
     requestAnimationFrame(() => {
-        modal.classList.add('show');
+      modal.classList.add('show');
     });
-}
+  }
 
-function closeModal() {
+  function closeModal() {
     modal.classList.remove('show');
     setTimeout(() => {
-        modal.style.display = 'none';
-        modalContent.innerHTML = '';
-        clonedCarousel = null;
+      modal.style.display = 'none';
+      modalContent.innerHTML = '';
+      clonedCarousel = null;
     }, 500);
-}
+  }
 
-// Open on click anywhere on the carousel
-carousel.addEventListener('click', openModal);
+  // Open modal on carousel click
+  carousel.addEventListener('click', (e) => {
+    // Prevent opening modal when clicking navigation buttons
+    if (e.target.closest('.carousel-control-prev') || e.target.closest('.carousel-control-next')) {
+      return;
+    }
+    openModal();
+  });
 
-// Close on backdrop click
-modalBackdrop.addEventListener('click', closeModal);
+  // Close modal on backdrop click
+  modalBackdrop.addEventListener('click', closeModal);
