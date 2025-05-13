@@ -629,9 +629,6 @@ output {
 }
 
 iframe {
-  width:100%;
-  height:auto;
-  background:transparent;
   border: 0;
 }
 
@@ -6871,9 +6868,29 @@ fieldset:disabled .btn {
   color: var(--bs-popover-body-color);
 }
 
-.carousel {
+/* .carousel {
   position: relative;
   transition: transform 0.3s ease-in-out;  // ChatGPT v2
+} */
+
+.carousel {
+  width: 100%;
+  height: 100%; /* Full height of wrapper */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.carousel-item {
+  max-height: 100%;
+  width: 100%;
+}
+
+.carousel-item img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
 }
 
 .carousel.pointer-event {
@@ -6901,6 +6918,12 @@ fieldset:disabled .btn {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   transition: transform 0.6s ease-in-out;
+}
+
+.carousel-item img {
+  width:100%;
+  height: auto;
+  display: block;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -6970,6 +6993,7 @@ fieldset:disabled .btn {
   border: 0;
   opacity: 0.75;
   transition: opacity 0.15s ease;
+  
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -7094,132 +7118,48 @@ fieldset:disabled .btn {
 
 
 
-/* // ChatGPT v5
+
+// ChatGPT v8
 
 .carousel-wrapper {
-  transition: transform 1.5s ease, width 1.5s ease, height 1.5s ease;
-  transform-origin: center center;
-  max-width: 95vw;
-  max-height: 90vh;
-  width: 100%;
-  height: auto;
-}
-
-// When expanded
-.carousel-wrapper.expanded {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(1.2); // Adjust zoom level here
-  width: 90vw;
-  height: 90vh;
-  z-index: 1050;
-}
-
-// Dark background overlay
-.carousel-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 1049;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  pointer-events: none;
-}
-
-.carousel-overlay.active {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-// Make carousel content fit expanded view
-.carousel-inner img {
-  max-width: 100%;
-  max-height: 80vh;
-  object-fit: contain;
-}
-
-// end ChatGPT v5
-*/
-
-
-
-
-
-// ChatGPT v6
-
-/* Modal container */
-#carouselModal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  z-index: 1050;
-}
-
-/* Modal backdrop */
-#modalBackdrop {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.85);
+  position: relative;
+  transition: all 0.6s ease;
   z-index: 1;
 }
 
-/* Modal content */
-#modalContent {
-  position: relative;
-  z-index: 2;
-  transition: transform 0.5s ease;
-  max-width: 95vw;
-  max-height: 90vh;
-  overflow: hidden;
-  background: #111;
-  padding: 1rem;
-  border-radius: 12px;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.9);
+.carousel-wrapper.zoomed {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 90vw;
+  height: 90vh; /* Make it tall */
+  z-index: 1050;
+  background-color: #000; /* Optional: helps with spacing perception */
   display: flex;
-  flex-direction: column;
   align-items: center;
-  transform: scale(0.7);
+  justify-content: center;
+  transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease;
+  overflow: hidden;
 }
 
-/* Show modal with animation */
-#carouselModal.show #modalContent {
-  transform: scale(1);
+.carousel-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: none;
+  z-index: 1050;
+  transition: opacity 0.4s ease;
 }
 
-/* Carousel within modal */
-#modalContent .carousel {
-  width: 100%;
-  max-height: 100%;
-}
-
-/* Carousel images */
-.carousel-item img {
-  max-width: 100%;
-  max-height: 80vh;
-  object-fit: contain;
+.carousel-overlay.active {
   display: block;
-  margin: 0 auto;
+  opacity: 1;
 }
 
-/* Navigation buttons */
-.carousel-control-prev,
-.carousel-control-next {
-  top: calc(100% + 0.5rem); /* Position below the image */
-  width: auto;
-  height: auto;
-  background: none;
-  color: white;
-  filter: drop-shadow(0 0 4px black);
-}
-
-// end ChatGPT v6
+// end ChatGPT v8
 
 
 
