@@ -24,7 +24,7 @@ window.addEventListener('DOMContentLoaded', event => {
     };
 
     // Initialize carousels
-    const carousel = document.querySelector("#carouselSNB");
+    const carousel = document.getElementById("carouselSNB");
     const overlay = document.getElementById("carouselOverlay");
     const wrapper = document.getElementById("carousel-wrapper");
 
@@ -92,43 +92,78 @@ function changePic(filepath) {
 //   overlay.classList.toggle('active');
 // }
 
-let isZoomed = false; // Variable to track zoom state
+let isZoomed = false; // Flag to track if zoom is active
 
-// Function to toggle zoom
-function toggleZoom() {
-  const carouselWrapper = document.getElementById("carouselWrapper");
+// Add event listener to the carousel items for zoom toggle
+document.querySelectorAll('.carousel-item').forEach(item => {
+    item.addEventListener('click', function () {
+        if (isZoomed) {
+            // If zoomed in, zoom out
+            zoomOut();
+        } else {
+            // If zoomed out, zoom in
+            zoomIn();
+        }
+    });
+});
 
-  if (isZoomed) {
-    // If already zoomed, zoom out
-    carouselWrapper.classList.remove('zoomed');
-    isZoomed = false;
-  } else {
-    // If not zoomed, zoom in
-    carouselWrapper.classList.add('zoomed');
+// Arrow click event to switch images
+const prevButton = document.querySelector('.carousel-control-prev');
+const nextButton = document.querySelector('.carousel-control-next');
+
+[prevButton, nextButton].forEach(button => {
+    button.addEventListener('click', function (event) {
+        // If zoomed, prevent zoom-in on arrow click
+        if (isZoomed) {
+            event.preventDefault(); // Prevent zoom from being triggered
+        }
+    });
+});
+
+// Function to zoom in
+function zoomIn() {
+    let _target = event.target;
+    const rect = _target.getBoundingClientRect();
+    console.log(rect.top, rect.height, rect.left, rect.width);
+
+    let ancestor = _target.closest('[id*="Wrapper"]');
+
+    const rCenterX = parseFloat(rect.left) + parseFloat(_target.width / 2);
+    const rCenterY = /*parseFloat(rect.top) + */parseFloat(_target.height / 2);
+
+    const wCenterX = window.innerWidth / 2;
+    const wCenterY = window.innerHeight / 2;
+
+    const translateX = wCenterX - rCenterX;
+    const translateY = wCenterY - rCenterY;
+
+    //ancestor.style.transformOrigin = 'center center';
+    ancestor.style.transition = 'transform .67s ease, width .67s ease, height .67s ease';
+    // ancestor.style.transform = 'scale(2)';
+    console.log('_target.left: ' + rect.left);
+    console.log('_target.width: ' + _target.width);
+    console.log('rect.center: ' + rCenterX);
+    console.log('_target.top: ' + rect.top);
+    console.log('_target.height: ' + _target.height);
+    console.log('rect.middle: ' + rCenterY);
+    console.log('window.innerWidth: ' + window.innerWidth);
+    console.log('window.innerHeight: ' + window.innerHeight);
+    console.log('translateX: ' + translateX);
+    console.log('translateY: ' + translateY);
+    ancestor.style.transform = ' translate(' + translateX + ',' + translateY + ')';
+    console.log(translateX, translateY);
+    ancestor.classList.add('zoomed');
     isZoomed = true;
-  }
+    // Optional: Add animation for smooth zoom
 }
 
-// Prevent zoom on arrow clicks
-function preventZoomOnArrows(event) {
-  if (isZoomed) {
-    event.stopPropagation(); // Prevent zoom toggle when arrow is clicked
-  }
+// Function to zoom out
+function zoomOut() {
+    let ancestor = event.target.closest('[id*="Wrapper"]');
+    ancestor.style.transformOrigin = 'center center';
+    ancestor.style.transition = 'transform .67s ease, width .67s ease, height .67s ease';
+    ancestor.style.transform = 'scale(1)';
+    ancestor.classList.remove('zoomed');
+    isZoomed = false;
+    // Optional: Add animation for smooth zoom out
 }
-
-// Handle next/prev slide button clicks (exclude zoom effect)
-document.querySelector('.carousel-control-prev').addEventListener('click', (event) => {
-  preventZoomOnArrows(event);
-});
-
-document.querySelector('.carousel-control-next').addEventListener('click', (event) => {
-  preventZoomOnArrows(event);
-});
-
-// Handle image clicks to toggle zoom
-document.querySelectorAll('.carousel-item img').forEach(img => {
-  img.addEventListener('click', (event) => {
-    toggleZoom(); // Toggle zoom in or out on image click
-    event.stopPropagation(); // Prevent event bubbling to parent elements
-  });
-});
