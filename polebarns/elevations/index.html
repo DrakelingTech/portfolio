@@ -1,0 +1,1977 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elevations</title>
+    <link href="css/elevations.css" rel="stylesheet" />
+</head>
+
+<body>
+
+    <!--INITIALIZE jQuery-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.8.21/jquery-ui.min.js"></script>
+
+    <script>
+
+        // BEGIN VARIABLE INITIALIZATION
+        svgNS = 'http://www.w3.org/2000/svg';
+
+        views = [];
+        activeView = null;
+        libMade = null;
+
+        mainOffsetX = 5;
+        mainOffsetY = 10;
+
+        incrementX = 3;
+        incrementY = null;
+
+        optionCount = 3;
+
+        colors = ['black', 'darkBlue', 'darkSlateGray', 'darkRed', 'darkGreen', 'darkMagenta', 'deepPink', 'indigo', 'purple'];
+        //	END VARIABLE INITIALIZATION=
+
+        //	BEGIN CONVERSION FUNCTIONS
+        function round(value, precision) {
+            var m = Math.pow(10, precision || 0);
+            return Math.round(value * m) / m;
+        }
+
+
+        function makePrime(string) {
+            var p = '\u2032';
+            var dP = '\u2033';
+
+            var string = string.toString();
+
+            var string = string.replace("'", p);
+            var string = string.replace("‘", p);
+            var string = string.replace("’", p);
+            var string = string.replace("′", p);
+
+            var string = string.replace('"', dP);
+            var string = string.replace('“', dP);
+            var string = string.replace('”', dP);
+            var string = string.replace('″', dP);
+
+            return string;
+        }
+
+
+        function footInchToDec(footInch, precision) {
+
+            var p = '\u2032';
+            var dP = '\u2033';
+            var dist = makePrime(footInch);
+
+            var fPos = dist.indexOf(p);
+            var iPos = dist.indexOf(dP);
+
+            //If the number has neither foot nor inch marks, add them.
+            if (fPos < 0 && iPos < 0) dist = decToFootInch(footInch, precision);
+
+            var fPos = dist.indexOf(p);
+            var iPos = dist.indexOf(dP);
+
+            /*If there is a foot mark, store the value before it.
+              If there is an inch mark, store nothing.
+              Otherwise, use the entire number.*/
+            var ft = (fPos > 0) ? dist.substring(0, fPos) : (iPos > 0) ? '' : parseInt(dist);
+            var ft = parseInt(ft);
+
+            var sPos = (iPos > 0) ? iPos : footInch.length;
+            var inch = dist.substring(fPos + 1, sPos);
+            var inch = parseFloat(inch);
+            if (isNaN(inch)) var inch = 0;
+
+            /*Note: due to rounding errors, the calculation can return a value of [x]′12″.
+              If this happens, round up to the next foot.*/
+            var ft = ft + Math.floor(inch / 12);
+            var inch = inch % 12;
+            var inchRound = round(inch / 12, precision);
+
+            return (parseFloat(ft) + parseFloat(inchRound));
+
+        }
+
+        function decToFootInch(decimal, precision, showZeroes) {
+
+            var p = '\u2032';
+            var dP = '\u2033';
+
+            var dist = makePrime(decimal);
+            var fPos = dist.indexOf(p);
+            var iPos = dist.indexOf(dP);
+
+            /*If there is a foot mark, store the value before it.
+              If there is an inch mark, store nothing.
+              Otherwise, use the entire number.*/
+            var ft = (fPos > 0) ? dist.substring(0, fPos) : (iPos > 0) ? '' : parseInt(dist);
+
+            //Store the inches appropriately.
+            dec = Math.abs(decimal) - Math.abs(ft);
+            if (fPos > 0 && iPos > 0) {
+                //If there are foot and inch marks, store the value between them.
+                var inch = dist.substring(fPos + 1, iPos);
+            }
+
+else if (fPos > 0) {
+                //If there is only a foot mark, store the value after it.
+                var inch = dist.substring(fPos + 1, decimal.length + 1);
+            }
+
+else {
+                //Otherwise, convert the decimal portion value to inches.
+                var inch = parseFloat((decimal - ft) * 12);
+            }
+
+            if (precision === undefined) precision = 6;
+            var inch = round(inch, precision);
+
+            /*Note: due to rounding errors, the calculation can return a value of [x]′12″.
+              If this happens, round up to the next foot.*/
+            ft = ft + Math.floor(inch / 12);
+            inch = inch % 12;
+
+            //If there are feet, display them.
+            var ft = (Math.abs(ft) > 0) ? ft + p : '';
+
+            //If there are inches that need to be shown, display them.
+            var inch = (round(inch, precision) == 0 && (showZeroes == false)) ? '' : inch + dP;
+
+            return (ft + inch);
+
+        }
+        //	END CONVERSION FUNCTIONS
+    </script>
+
+
+    <!--====BEGIN SMALL DIVS====-->
+
+    <!--BEGIN ZOOM OUT BUTTON-->
+    <div id="zoomOutButton" class="closebtn hidden">
+        <a name="close" class="closebtn" onClick="zoomOut()">&times;</a>
+    </div>
+    <!--=END ZOOM OUT BUTTON=-->
+
+
+    <!--BEGIN LIBRARY BUTTON-->
+    <div id="libButton" class="libButton" onclick="openLib()">
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.2" baseProfile="tiny" viewBox="0 0 1000 1000">
+            <metadata>Svg Vector Icons: http:&#x2F;&#x2F;www.onlinewebfonts.com&#x2F;icon</metadata>
+            <path
+                d="M195 475H192c-21 0-38 17-38 38v3c0 21 17 38 38 38h3c15 0 28-9 34-21h84V496h-84C222 484 209 475 195 475z" />
+            <path
+                d="M971 466h-10l0-10c0 0 0 0 0-1l0 0V80c0-29-24-53-53-53H503c-27 0-50 21-52 47H112c-30 0-55 25-55 55V917c0 0 0 1 0 1H10v55h102 459H683v-54h-57c0 0 0 0 0-1l0-410h283H990v-42L971 466 971 466zM492 253V79v-10h10 190 10v10 174 10h-10H502h-10V253zM572 918H110V129h341v326l0 0c0 0 0 0 0 1l0 10h-10 -19v42h81 69V918L572 918zM702 296v159 10h-10H502h-10v-10V296v-10h10 190 10V296zM920 296v159 10h-10H735h-10v-10V296v-10h10 176 10V296L920 296zM920 79v174 10h-10H735h-10v-10V79v-10h10 176 10V79L920 79z" />
+        </svg>
+    </div>
+    <!--=END LIBRARY BUTTON=-->
+
+
+    <!--BEGIN LIBRARY DIV/TABLE-->
+    <div id="library" class="lib">
+        <a class="closebtn lib" onclick="closeLib()">&times;</a>
+
+        <table id="libTable">
+            <tr id="libTableRow0">
+                <td id="libTableCell0" style="height:30px; border:0;" />
+            </tr>
+        </table>
+    </div>
+    <!--=END LIBRARY DIV/TABLE=-->
+
+
+    <!--=====END SMALL DIVS=====-->
+
+
+    <!--=========BEGIN ELEVATIONS=========-->
+
+    <!--FRONT ELEVATION-->
+
+    <div id="frameFrontDiv" class="elevation" style="bottom:5px; left:5px;">
+
+        <svg id="frameFront" class="elevation" viewBox="0 5 45 32.6666666666666667">
+
+            <!--TITLE-->
+            <text class="title" x="50%" y=7.5>Front</text>
+
+            <g id="wallFront" transform="translate(5,10)">
+
+                <!--PIERS-->
+                <rect x=-.05 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=11.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=19.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=27.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=39.55 y=6.7 width=.5 height=16 class="pole" />
+
+                <!--WALL-->
+                <rect id="wallFrontRect" x=0 y=6.7 width=40 height=16 class="wall" ondrop="drop(event)"
+                    ondragover="allowDrop(event)" />
+
+                <script>
+                    <!-- Add siding to wall -->
+                    for (i = 0; i < 40; i++) {
+                        var aLine = document.createElementNS(svgNS, 'line');
+                        wallFront.appendChild(aLine); $(aLine).attr({ 'x1': i, 'y1': 6.7, 'x2': i, 'y2': 22.7 });
+                        $(aLine).addClass('wall');
+                    
+
+} //end for </script>
+
+                    <!--ROOF-->
+                    <polygon id="roofFront" points="0,6.7 20,0 40,6.7 40,6.7 40,6.7 0,6.7 0,6.7" class="roof" />
+
+            </g>
+
+
+
+            <g id="vDimsFront" transform="translate(0,10)">
+
+                <!--WALL HEIGHT DIMENSION-->
+                <line x1=2 y1=6.7 x2=4 y2=6.7 class="dimWall" />
+                <line x1=3 y1=6.7 x2=3 y2=22.7 class="dimWall break" style="stroke-dasharray:6,4;" />
+                <line x1=2 y1=22.7 x2=4 y2=22.7 class="dimWall" />
+                <text class="dimension" x=3 y=14.7 transform="rotate(-90,3,14.7)">
+                    16&prime;0&Prime;
+                </text>
+
+                <!--ROOF HEIGHT DIMENSION-->
+                <line x1=0 y1=0 x2=2 y2=0 class="dimRoof" />
+                <line x1=1 y1=0 x2=1 y2=22.7 class="dimRoof break" style="stroke-dasharray:9.35,4;" />
+                <line x1=0 y1=22.7 x2=2 y2=22.7 class="dimRoof" />
+                <text class="dimension" x=1 y=11.35 transform="rotate(-90,1,11.35)">
+                    22&prime;8&Prime;
+                </text>
+
+            </g>
+
+            <g id="hDimsFront" transform="translate(5,10)">
+
+                <!--FRONT WALL DIMENSION-->
+                <line x1=0 y1=23.7 x2=0 y2=25.7 class="dimWall" />
+                <line x1=40 y1=23.7 x2=40 y2=25.7 class="dimWall break" />
+                <line x1=0 y1=24.7 x2=40 y2=24.7 class="dimWall break" style="stroke-dasharray:18,4;" />
+                <text class="dimension" x=20 y=24.7>
+                    40&prime;0&Prime;
+                </text>
+
+            </g>
+
+            <!--/g-->
+        </svg>
+    </div>
+
+    <script>
+        var frameFrontDiv = document.getElementById('frameFrontDiv');
+        frameFrontDiv.addEventListener('click', function () { zoomIn('Front'); }, false);
+        views.push('frameFrontDiv');
+    </script>
+
+
+    <!--BACK ELEVATION-->
+
+    <div id="frameBackDiv" class="elevation" style="bottom:5px; right:5px;">
+
+        <svg id="frameBack" class="elevation" viewBox="0 5 45 32.6666666666666667">
+
+            <!--TITLE-->
+            <text class="title" x="50%" y=7.5>Back</text>
+
+            <g id="wallBack" transform="translate(5,10)">
+
+                <!--PIERS-->
+                <rect x=-.05 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=11.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=19.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=27.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=39.55 y=6.7 width=.5 height=16 class="pole" />
+
+                <!--WALL-->
+                <rect id="wallBackRect" x=0 y=6.7 width=40 height=16 class="wall" ondrop="drop(event)"
+                    ondragover="allowDrop(event)" />
+
+                <script>
+                    //	Add siding to wall
+                    for (i = 0; i < 40; i++) {
+                        var aLine = document.createElementNS(svgNS, 'line'); wallBack.appendChild(aLine);
+                        $(aLine).attr({ 'x1': i, 'y1': 6.7, 'x2': i, 'y2': 22.7 }); $(aLine).addClass('wall');
+                    
+
+} //end for </script>
+
+                // ROOF
+                <polygon id="roofBack" points="0,6.7 20,0 40,6.7 40,6.7 40,6.7 0,6.7 0,6.7" class="roof" />
+            </g>
+
+
+
+            <g id="vDimsBack" transform="translate(0,10)">
+
+                <!--WALL HEIGHT DIMENSION-->
+                <line x1=2 y1=6.7 x2=4 y2=6.7 class="dimWall" />
+                <line x1=3 y1=6.7 x2=3 y2=22.7 class="dimWall break" style="stroke-dasharray:6,4;" />
+                <line x1=2 y1=22.7 x2=4 y2=22.7 class="dimWall" />
+                <text class="dimension" x=3 y=14.7 transform="rotate(-90,3,14.7)">
+                    16&prime;0&Prime;
+                </text>
+
+                <!--ROOF HEIGHT DIMENSION-->
+                <line x1=0 y1=0 x2=2 y2=0 class="dimRoof" />
+                <line x1=1 y1=0 x2=1 y2=22.7 class="dimRoof break" style="stroke-dasharray:9.35,4;" />
+                <line x1=0 y1=22.7 x2=2 y2=22.7 class="dimRoof" />
+                <text class="dimension" x=1 y=11.35 transform="rotate(-90,1,11.35)">
+                    22&prime;8&Prime;
+                </text>
+
+            </g>
+
+            <g id="hDimsBack" transform="translate(5,10)">
+
+                <!--BACK WALL DIMENSION-->
+                <line x1=0 y1=23.7 x2=0 y2=25.7 class="dimWall" />
+                <line x1=40 y1=23.7 x2=40 y2=25.7 class="dimWall break" />
+                <line x1=0 y1=24.7 x2=40 y2=24.7 class="dimWall break" style="stroke-dasharray:18,4;" />
+                <text class="dimension" x=20 y=24.7>
+                    40&prime;0&Prime;
+                </text>
+
+            </g>
+
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        var frameBackDiv = document.getElementById('frameBackDiv');
+        frameBackDiv.addEventListener('click', function () { zoomIn('Back'); }, false);
+        views.push('frameBackDiv');
+    </script>
+
+
+    <!--LEFT ELEVATION-->
+
+    <div id="frameLeftDiv" class="elevation" style="top:5px; left:5px;">
+
+        <svg id="frameLeft" class="elevation" viewBox="0 5 75 32.6666666666666667">
+
+            <!--TITLE-->
+            <text class="title" x="50%" y=7.5>Left</text>
+
+            <g id="wallLeft" transform="translate(5,10)">
+
+                <!--PIERS-->
+                <rect x=-.05 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=8.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=17.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=26.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=33.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=42.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=51.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=60.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=69.55 y=6.7 width=.5 height=16 class="pole" />
+
+                <!--WALL-->
+                <rect id="wallLeftRect" x=0 y=6.7 width=70 height=16 class="wall" ondrop="drop(event)"
+                    ondragover="allowDrop(event)" />
+
+                <script>
+                    <!--Add siding to wall-->
+                    for (i = 0; i < 70; i++) {
+                        var aLine = document.createElementNS(svgNS, 'line');
+                        wallLeft.appendChild(aLine); $(aLine).attr({ 'x1': i, 'y1': 6.7, 'x2': i, 'y2': 22.7 });
+                        $(aLine).addClass('wall');
+                    
+
+} //end for </script>
+
+                    <!--ROOF-->
+                    <polygon points="0,6.7 1.4,0 68.6,0 70,6.7" class="roof" />
+
+            </g>
+
+
+
+            <g id="vDimsLeft" transform="translate(0,10)">
+
+                <!--WALL HEIGHT DIMENSION-->
+                <line x1=2 y1=6.7 x2=4 y2=6.7 class="dimWall" />
+                <line x1=3 y1=6.7 x2=3 y2=22.7 class="dimWall break" style="stroke-dasharray:6,4;" />
+                <line x1=2 y1=22.7 x2=4 y2=22.7 class="dimWall" />
+                <text class="dimension" x=3 y=14.7 transform="rotate(-90,3,14.7)">
+                    16&prime;0&Prime;
+                </text>
+
+                <!--ROOF HEIGHT DIMENSION-->
+                <line x1=0 y1=0 x2=2 y2=0 class="dimRoof" />
+                <line x1=1 y1=0 x2=1 y2=22.7 class="dimRoof break" style="stroke-dasharray:9.35,4;" />
+                <line x1=0 y1=22.7 x2=2 y2=22.7 class="dimRoof" />
+                <text class="dimension" x=1 y=11.35 transform="rotate(-90,1,11.35)">
+                    22&prime;8&Prime;
+                </text>
+
+            </g>
+
+            <g id="hDimsLeft" transform="translate(5,10)">
+
+                <!--LEFT WALL DIMENSION-->
+                <line x1=0 y1=23.7 x2=0 y2=25.7 class="dimWall" />
+                <line x1=70 y1=23.7 x2=70 y2=25.7 class="dimWall break" />
+                <line x1=0 y1=24.7 x2=70 y2=24.7 class="dimWall break" style="stroke-dasharray:33,4;" />
+                <text class="dimension" x=35 y=24.7>
+                    70&prime;0&Prime;
+                </text>
+
+            </g>
+
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        var frameLeftDiv = document.getElementById('frameLeftDiv');
+        frameLeftDiv.addEventListener('click', function () { zoomIn('Left'); }, false);
+        views.push('frameLeftDiv');
+    </script>
+
+
+    <!--RIGHT ELEVATION-->
+
+    <div id="frameRightDiv" class="elevation" style="top:5px; right:5px;">
+
+        <svg id="frameRight" class="elevation" viewBox="0 5 75 32.6666666666666667">
+
+            <!--TITLE-->
+            <text class="title" x="50%" y=7.5>Right</text>
+
+            <g id="wallRight" transform="translate(5,10)">
+
+                <!--PIERS-->
+                <rect x=-.05 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=8.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=17.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=26.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=33.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=42.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=51.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=60.75 y=6.7 width=.5 height=16 class="pole" />
+                <rect x=69.55 y=6.7 width=.5 height=16 class="pole" />
+
+                <!--WALL-->
+                <rect id="wallRightRect" x=0 y=6.7 width=70 height=16 class="wall" ondrop="drop(event)"
+                    ondragover="allowDrop(event)" />
+
+                <script>
+                    <!--Add siding to wall-->
+                    for (i = 0; i < 70; i++) {
+                        var aLine = document.createElementNS(svgNS, 'line');
+                        wallRight.appendChild(aLine); $(aLine).attr({ 'x1': i, 'y1': 6.7, 'x2': i, 'y2': 22.7 });
+                        $(aLine).addClass('wall');
+                    
+
+} //end for </script>
+
+                    <!--ROOF-->
+                    <polygon points="0,6.7 1.4,0 68.6,0 70,6.7" class="roof" />
+
+            </g>
+
+
+
+            <g id="vDimsRight" transform="translate(0,10)">
+
+                <!--WALL HEIGHT DIMENSION-->
+                <line x1=2 y1=6.7 x2=4 y2=6.7 class="dimWall" />
+                <line x1=3 y1=6.7 x2=3 y2=22.7 class="dimWall break" style="stroke-dasharray:6,4;" />
+                <line x1=2 y1=22.7 x2=4 y2=22.7 class="dimWall" />
+                <text class="dimension" x=3 y=14.7 transform="rotate(-90,3,14.7)">
+                    16&prime;0&Prime;
+                </text>
+
+                <!--ROOF HEIGHT DIMENSION-->
+                <line x1=0 y1=0 x2=2 y2=0 class="dimRoof" />
+                <line x1=1 y1=0 x2=1 y2=22.7 class="dimRoof break" style="stroke-dasharray:9.35,4;" />
+                <line x1=0 y1=22.7 x2=2 y2=22.7 class="dimRoof" />
+                <text class="dimension" x=1 y=11.35 transform="rotate(-90,1,11.35)">
+                    22&prime;8&Prime;
+                </text>
+
+            </g>
+
+            <g id="hDimsRight" transform="translate(5,10)">
+
+                <!--RIGHT WALL DIMENSION-->
+                <line x1=0 y1=23.7 x2=0 y2=25.7 class="dimWall" />
+                <line x1=70 y1=23.7 x2=70 y2=25.7 class="dimWall break" />
+                <line x1=0 y1=24.7 x2=70 y2=24.7 class="dimWall break" style="stroke-dasharray:33,4;" />
+                <text class="dimension" x=35 y=24.7>
+                    70&prime;0&Prime;
+                </text>
+
+            </g>
+
+            </g>
+        </svg>
+    </div>
+
+    <script>
+        var frameRightDiv = document.getElementById('frameRightDiv');
+        frameRightDiv.addEventListener('click', function () { zoomIn('Right'); }, false);
+        views.push('frameRightDiv');
+    </script>
+
+
+    </div>
+
+    </div>
+
+</body>
+
+
+<!--======FUNCTIONS======-->
+
+<script>
+
+    <!--BEGIN CONVERSION FUNCTIONS-->
+    function round(value, precision) {
+        var m = Math.pow(10, precision || 0);
+        return Math.round(value * m) / m;
+    }
+
+
+    function makePrime(string) {
+        var p = '\u2032';
+        var dP = '\u2033';
+
+        var string = string.toString();
+
+        var string = string.replace("'", p);
+        var string = string.replace("‘", p);
+        var string = string.replace("’", p);
+        var string = string.replace("′", p);
+
+        var string = string.replace('"', dP);
+        var string = string.replace('“', dP);
+        var string = string.replace('”', dP);
+        var string = string.replace('″', dP);
+
+        return string;
+    }
+
+
+    function footInchToDec(footInch, precision) {
+
+        var p = '\u2032';
+        var dP = '\u2033';
+        var dist = makePrime(footInch);
+
+        var fPos = dist.indexOf(p);
+        var iPos = dist.indexOf(dP);
+
+        //If the number has neither foot nor inch marks, add them.
+        if (fPos < 0 && iPos < 0) dist = decToFootInch(footInch, precision);
+var fPos = dist.indexOf(p);
+var             iPos = dist.indexOf(dP);
+            
+            /*If there is a foot mark, store the value before it. If there is an inch mark, store
+    nothing. Otherwise, use the entire number.*/
+    var ft = (fPos > 0) ? dist.substring(0, fPos) : (iPos > 0) ? '' :
+            parseInt(dist);
+        var ft = parseInt(ft);
+
+        var sPos = (iPos > 0) ? iPos : footInch.length;
+        var inch = dist.substring(fPos + 1, sPos);
+        var inch = parseFloat(inch);
+        if (isNaN(inch)) var inch = 0;
+
+        /*Note: due to rounding errors, the calculation can return a value of [x]′12″.
+        If this happens, round up to the next foot.*/
+        var ft = ft + Math.floor(inch / 12);
+        var inch = inch % 12;
+        var inchRound = round(inch / 12, precision);
+
+        return (parseFloat(ft) + parseFloat(inchRound));
+
+    }
+
+    function decToFootInch(decimal, precision, showZeroes) {
+
+        var p = '\u2032';
+        var dP = '\u2033';
+
+        var dist = makePrime(decimal);
+        var fPos = dist.indexOf(p);
+        var iPos = dist.indexOf(dP);
+
+        /*If there is a foot mark, store the value before it.
+        If there is an inch mark, store nothing.
+        Otherwise, use the entire number.*/
+        var ft = (fPos > 0) ? dist.substring(0, fPos) : (iPos > 0) ? '' : parseInt(dist);
+
+        //Store the inches appropriately.
+        dec = Math.abs(decimal) - Math.abs(ft);
+        if (fPos > 0 && iPos > 0) {
+            //If there are foot and inch marks, store the value between them.
+            var inch = dist.substring(fPos + 1, iPos);
+        }
+
+else if (fPos > 0) {
+            //If there is only a foot mark, store the value after it.
+            var inch = dist.substring(fPos + 1, decimal.length + 1);
+        }
+
+else {
+            //Otherwise, convert the decimal portion value to inches.
+            var inch = parseFloat((decimal - ft) * 12);
+        }
+
+        if (precision === undefined) precision = 6;
+        var inch = round(inch, precision);
+
+        /*Note: due to rounding errors, the calculation can return a value of [x]′12″.
+        If this happens, round up to the next foot.*/
+        ft = ft + Math.floor(inch / 12);
+        inch = inch % 12;
+
+        //If there are feet, display them.
+        var ft = (Math.abs(ft) > 0) ? ft + p : '';
+
+        //If there are inches that need to be shown, display them.
+        var inch = (round(inch, precision) == 0 && (showZeroes == false)) ? '' : inch + dP;
+
+        return (ft + inch);
+
+    }
+    // END CONVERSION FUNCTIONS
+
+    // BEGIN LIBRARY FUNCTIONS
+
+    function openLib() {
+        if (libMade != true) {
+            libMade = true;
+        }
+        var lib = document.getElementById('library');
+        lib.style.width = '250px';
+        lib.style.boxShadow = '-3px 0 15px 0 #333';
+        $(activeDiv).addClass('narrow');
+    }
+
+    function closeLib() {
+        var lib = document.getElementById('library');
+        lib.style.width = 0;
+        lib.style.boxShadow = 'none';
+        $(activeDiv).removeClass('narrow');
+        $(activeDiv).addClass('wide');
+    }
+    // END LIBRARY FUNCTIONS
+
+    // BEGIN DRAG - AND - DROP FUNCTIONS
+
+    // BEGIN DEFAULT DRAG
+
+    //Make sure the document is ready.
+    $(document).ready(function () {
+
+        var cSVG;
+        $('svg').on('mousedown', '.redrag', function (evt) {
+
+            //Store the curent target, its group, and the enclosing SVGs.
+            var target = evt.target;
+            var targetID = target.id;
+
+            csID = targetID.replace('Remove', '');
+
+            if (targetID.indexOf('Remove') < 0) {
+                var gTarget = evt.target.closest('g');
+var pTarget = gTarget.closest('svg');
+var     pTargetID = pTarget.id; csID = pTargetID;
+var tTarget = pTarget.parentElement;
+var sTarget = tTarget.closest('svg');
+
+                //Get the initial coordinates of the pointer.
+                var coords=getCoords(evt);
+                var x=parseFloat(coords[0]);
+                var y = parseFloat(coords[1]);
+
+// Store the option’s size.
+                var optW=parseFloat($(pTarget).attr('width'));
+                var optH = parseFloat($(pTarget).attr('height'));
+                var pTUPos = pTargetID.indexOf('_'); eval('optW_' + pTargetID.substring(0, pTUPos) + '=' + optW); eval('optH_' + pTargetID.substring(0, pTUPos) + '=' + optH);
+                
+                //Get the initial coordinates of the option
+                var optL = parseFloat($(pTarget).attr('x') - mainOffsetX) + x;
+                var optT = parseFloat($(pTarget).attr('y') - mainOffsetY) + y;
+                var optR = optL + optW;
+var optB = optT + optH;
+                
+                //Get the initial transform of the target.
+                var tr = $(gTarget).attr('transform'); if (tr === undefined) tr = 'translate(0, 0)';
+                var trv = tr.replace(/translate\(|\)/g, '');
+var trVals = trv.split(', ');
+                var xT = parseFloat(trVals[0]);
+                var yT = parseFloat(trVals[1]);
+
+                //Store the maximum distances the option can be moved.
+                var minX = -(optL - x) + (wallL - mainOffsetX);
+                var minY = -(optT - y) + (wallT - mainOffsetY);
+
+                var maxX = wallR - (optR - x) - mainOffsetX;
+                var maxY = wallB - (optB - y) - mainOffsetY;
+
+                //Just in case the mouse doesn’t move, initialize the drop variables.
+                var xD = '';
+                var yD = '';
+
+                //Store the default fill color(s).
+                defaultFill = $(target).css(' fill');
+                //When the mouse is moved while down, apply the transformation.
+                $(this).on('mousemove', function (evt) {
+                
+                    //Make sure the selected SVG is in front and highlighted.
+                    sTarget.appendChild(pTarget); $(target).css('fill', '#eafaff');
+                    
+                    //Store the ID of the parent SVG.
+                    var par = pTarget.id;
+                    
+                    //Store the current coordinates.
+                    var coords=getCoords(evt);
+                    var xD=coords[0];
+                    var yD = coords[1]; eval('xD_' + targetID + '=' + xD); eval('yD_' + targetID + '=' + yD);
+                    
+                    //Store the attachTo value. (Make sure it’s defined.)
+                    var attachto = $(this).attr('attachto');
+                    var attachto = (typeof attachto === 'undefined') ? '' : attachto;
+                    
+                    //Store the translate values.
+                    if (attachto.indexOf('left')>= 0 || attachto.indexOf('right') >= 0) {
+            //If the option is attached to the left or right, x doesn’t change.
+            var translateX = 0;
+        }
+
+else {
+            var defaultX = (xT + xD - x);
+            var translateX = Math.max(minX, Math.min(defaultX, maxX));
+        }
+
+        if (attachto.indexOf('top') >= 0 || attachto.indexOf('bottom') >= 0) {
+            //If the option is attached to the top or bottom, y doesn’t change.
+            var translateY = 0;
+        }
+
+else {
+            var defaultY = (yT + yD - y);
+            var translateY = Math.max(minY, Math.min(defaultY, maxY));
+        }
+
+        $(gTarget).attr('transform', 'translate(' + translateX + ', ' + translateY + ')');
+        eval('translateX_' + pTargetID + '=' + translateX);
+        eval('translateY_' + pTargetID + '=' + translateY);
+        var pX = parseFloat($(pTarget).attr('x'));
+        var pY = parseFloat($(pTarget).attr('y'));
+
+        //Store the distance from each side of the wall.
+        var distL = (pX + translateX) - wallL;
+        eval('distL_' + pTargetID + '=' + distL);
+
+        var distR = wallR - (optW + pX + translateX);
+        eval('distR_' + pTargetID + '=' + distR);
+
+        var distT = (pY + translateY) - wallT;
+        eval('distT_' + pTargetID + '=' + distT);
+
+        var distB = wallB - (optH + pY + translateY);
+        eval('distB_' + pTargetID + '=' + distB);
+
+        var obj = event.target;
+
+        /*If the option is attached to any side, we don’t
+        need dimensions for that side nor its opposite.*/
+        var sides = [];
+        if (attachto !== 'left' && attachto !== 'right') sides.push('left', 'right');
+        if (attachto !== 'top' && attachto !== 'bottom') sides.push('top', 'bottom');
+
+        for (i = 0; i < sides.length; i++) {
+            var dimSide = sides[i].substring(0, 1).toUpperCase();
+            updateOptDim(pTarget, dimSide, false);
+        }
+    
+} //end if
+    );
+
+    //Let go of the option when the mouse is released or the cursor goes past the edge of the building.
+   
+    $(this).on('mouseup', function (evt) {
+        $(this).off('mousemove'); $(this).blur;
+        $(target).css('fill', defaultFill);
+var targetID = target.id;
+var gTarget = target.closest('g');
+var             pTarget = gTarget.closest('svg');
+var pTargetID = pTarget.id;
+            
+            //If the translate values are undefined for this object, initialize them.
+            try { eval('translateX_' + pTargetID); }
+
+catch (err) {
+            eval('translateX_' +
+                pTargetID + '=0')
+        }
+
+try { eval('translateY_' + pTargetID); }
+
+catch (err) {
+            eval('translateY_' + pTargetID
+                + '=0')
+        }
+
+var translateX = eval('translateX_' + pTargetID);
+var translateY = eval('translateY_' + pTargetID);
+        if (incrementX > 0) var translateX = round(translateX / incrementX, 0) * incrementX;
+        if (incrementY > 0) var translateY = round(translateY / incrementY, 0) * incrementY;
+
+        $(gTarget).attr('transform', 'translate(' + translateX + ', ' + translateY + ')');
+        eval('translateX_' + pTargetID + '=' + translateX);
+        eval('translateY_' + pTargetID + '=' + translateY);
+
+        //Store the attachTo value. (Make sure it’s defined.)
+        var attachto = $(this).attr('attachto');
+        var attachto = (typeof attachto === 'undefined') ? '' : attachto;
+
+        /*If the option is attached to any side, we don’t
+        need dimensions for that side nor its opposite.*/
+        var sides = [];
+        if (attachto !== 'left' && attachto !== 'right') sides.push('left', 'right');
+        if (attachto !== 'top' && attachto !== 'bottom') sides.push('top', 'bottom');
+
+        for (i = 0; i < sides.length; i++) {
+            var dimSide = sides[i].substring(0, 1).toUpperCase();
+            updateOptDim(pTarget, dimSide, true);
+        }
+    }); }
+
+});
+//end SVG function
+    });
+//end document function
+    // END DEFAULT DRAG
+   
+    function getCoords(evt, target) {
+        
+        //Check to see if the target is explicitly specified.
+                        if(target === undefined) {
+            var target = (event.targetTouches && event.targetTouches.length) ?
+                $(event.targetTouches[0].target) : event.target;
+                var tDefined = false;
+                //}
+                }
+
+else {
+                    var tDefined=true;
+                }
+
+                //Check to see if the target is an SVG element.
+                var svgTop=target.ownerSVGElement;
+                if (target instanceof SVGElement) {
+                    var isSVG = true;
+                }
+
+else if (svgTop === undefined) {
+                    var isSVG = false;
+                }
+
+else {
+                var isSVG = true;
+            }
+            
+            if (isSVG) {
+                
+                //If the target is an SVG, translate the cursor position into svg coordinates.
+                cSVG = target;
+                cGroup = cSVG.querySelector('g');
+                if (cSVG === undefined) var cSVG = target;
+                
+                if (cSVG instanceof SVGElement) { 
+                
+                    //Create the point based on the identity of the current object.
+                    pt=(svgTop===null) ? cSVG.createSVGPoint() : svgTop.createSVGPoint();
+                    
+                    if (tDefined) {
+                        pt.x = $(target).attr('x');
+                        pt.y = $(target).attr('y');
+var cursorPt = pt.matrixTransform(svgTop.getScreenCTM());
+                    }
+
+else {
+                        pt.x = evt.clientX; pt.y = evt.clientY;
+var cursorPt = pt.matrixTransform(svgTop.getScreenCTM().inverse());
+                    }
+                    var x = cursorPt.x;
+var y = cursorPt.y;
+                }
+            }
+
+else {
+                
+                //Otherwise, translate the cursor position according to the bounding rectangle.
+                var bcRect = target.getBoundingClientRect();
+                var bcLeft = bcRect.left;
+                var bcTop = bcRect.top;
+                var x = evt.clientX - bcLeft;
+                var y = evt.clientY - bcTop;
+            }
+
+return [x, y]
+        }
+        
+        function
+            addFromLib(evt) {
+                
+                /*This function MUST act on a div, which works correctly with mouse events. However,
+                it does not work correctly with touch events. Thus, if touch is being used, we need to select the
+                target’s closest div ancestor.*/
+                
+                var trg = (evt.targetTouches && evt.targetTouches.length) ?
+                $(evt.targetTouches[0].target).closest('div')[0] : evt.target;
+                
+                //Once we’ve got the appropriate div, select the first child SVG.
+                opt = $(trg).find('svg')[0]; optID = opt.id;
+var bcr = opt.getBoundingClientRect();
+            var optW = bcr.width;
+var optH = bcr.height;
+var coords = getCoords(evt, trg); x = coords[0]; y = coords[1];
+            prcX = x / optW; prcY = y / optH;
+var optW = round($(opt).attr('width'), 1);
+var optH = round($(opt).attr('height'), 1); eval('optW_' + optID + '=' + optW); eval('optH_' + optID + '=' +
+                    optH);
+        }
+
+function allowDrop(evt) { evt.preventDefault(); }
+
+function drop(evt) {
+    
+    //Suppress standard functionality.
+            evt.preventDefault();
+
+//Augment the option number.
+            try { optNum=optNum + 1; }
+
+catch (e) {
+            optNum = 1
+        };
+        
+        //Since this is the first drop, clone the the node.
+        
+        cloneNode(opt);
+        var cTarget=evt.target;
+        var optID = opt.id; csID = optID + '_' + optNum; makeCloseButton(csID);
+var optW = round($(opt).attr('width'),
+            1);
+var optH = round($(opt).attr('height'), 1);
+var translateX = 0;
+var translateY = 0;
+var coords = getCoords(evt);
+var dropX = coords[0]; dropY = coords[1];
+var pt = cSVG.createSVGPoint();
+        pt.x = evt.pageX; pt.y = evt.pageY;
+var ctm = evt.target.getScreenCTM(); if (ctm = ctm.inverse())
+            pt = pt.matrixTransform(ctm);
+var minX = wallL;
+var minY = wallT;
+var maxX = wallR - optW;
+var maxY = wallB -
+                optH;
+var optX = pt.x - (prcX * optW) + mainOffsetX;
+var optY = pt.y - (prcY * optH) + mainOffsetY;
+var     attachto = $(cSVG).attr('attachto'); if (typeof attachto === 'undefined') attachto = ''; if
+            (attachto.indexOf('left') >= 0) {
+            var finalX = minX;
+        }
+
+else if (attachto.indexOf('right') >= 0) {
+            var finalX = maxX;
+        }
+
+else {
+            var finalX = Math.max(minX, Math.min(maxX, optX));
+        }
+
+        if (attachto.indexOf('top') >= 0) {
+            var finalY = minY;
+        }
+
+else if (attachto.indexOf('bottom') >= 0) {
+            var finalY = maxY;
+        }
+
+else {
+            var finalY = Math.max(minY, Math.min(maxY, optY));
+        }
+
+        //If the x-axis is constrained to increments, use that constraint.
+        if (incrementX > 0) {
+            $(cSVG).attr('x', wallL + (round((finalX - wallL) / incrementX, 0) * incrementX));
+        }
+
+else {
+            $(cSVG).attr('x', finalX);
+        }
+
+        //If the y-axis is constrained to increments, use that constraint.
+        if (incrementY > 0) {
+            $(cSVG).attr('y', wallT + (round((finalY - wallT) / incrementY, 0) * incrementY));
+        }
+
+else {
+            $(cSVG).attr('y', finalY);
+        }
+
+        //Remove the library option’s CSS dimensions from the clone.
+        $(cSVG).css({ 'width': '', 'height': '' });
+        activeSVG.appendChild(cSVG);
+
+        var pX = parseFloat($(cSVG).attr('x'));
+        var pY = parseFloat($(cSVG).attr('y'));
+
+        var distL = pX - wallL;
+        eval('distL_' + csID + '=' + distL);
+
+        var distR = wallR - (optW + pX);
+        eval('distR_' + csID + '=' + distR);
+
+        var distT = pY - wallT;
+        eval('distT_' + csID + '=' + distT);
+
+        var distB = wallB - (optH + pY);
+        eval('distB_' + csID + '=' + distB);
+
+        //Add visible dimensions.
+
+        /*If the option is attached to a side, we don’t
+        need dimensions for that side nor its opposite.*/
+        var sides = [];
+        if (attachto !== 'left' && attachto !== 'right') sides.push('left', 'right');
+        if (attachto !== 'top' && attachto !== 'bottom') sides.push('top', 'bottom');
+
+        var dynadimGroup = document.createElementNS(svgNS, 'g');
+        dynadimGroup.id = csID + 'DynadimGroup';
+        cSVG.appendChild(dynadimGroup);
+
+        eval('translateX_' + csID + '=' + translateX);
+        eval('translateY_' + csID + '=' + translateY);
+
+        for (i = 0; i < sides.length; i++) { var dim = makeOptDim(opt, sides[i]); }
+
+//Update the remaining count.
+        var countDivName = optID + 'OptCount'; updateCount(countDivName, -1); eval('optW_' + optID + '=' +
+            optW); eval('optH_' + optID + '=' + optH);
+    }
+
+function cloneNode(obj) { //Clone the the node.
+        cSVG = obj.cloneNode(true); csID = obj.id; csID = csID + '_' + optNum; cSVG.id = csID;
+        $(cSVG).removeAttr('ondragstart'); cGroup = $('g:first', cSVG)[0]; $(cGroup).addClass('redrag');
+var             at = $(obj).attr('attachto');
+var w = $(obj).attr('width');
+var h = $(obj).attr('height')
+        $(cGroup).attr({ 'draggable': 'true', 'attachto': at, 'width': w, 'height': h });
+        
+        //Set the custom color of the option and its dimensions.
+        optColor = colors[(optNum % colors.length)];
+        var topLevel = $('rect', cSVG)[0]; $(topLevel).attr('color', optColor).removeAttr('viewBox');
+        $(topLevel).css({ 'stroke': optColor, 'stroke-width': '4px', 'stroke-opacity': '0.5' });
+
+        //Update the IDs of all its children.
+var kids=cSVG.querySelectorAll('*'); for (i=0; i <
+        kids.length; i++) { var kid = kids[i]; kid.id = kid.id.replace(obj.id, csID); }
+    }
+
+// END DRAG-AND-DROP FUNCTIONS
+
+
+// BEGIN DIMENSIONS FUNCTIONS
+
+function makeOptDim(obj, side) { var objID=obj.id;
+    csID = objID + '_' + optNum;
+var cs = document.getElementById(csID);
+var dgID = csID + 'DynadimGroup';
+    var dynadimGroup = document.getElementById(dgID);
+var dimSide = side.substring(0, 1).toUpperCase();
+var dynadim = csID + 'Dynadim' + dimSide;
+var dimGroup = document.createElementNS(svgNS, 'g');
+    dimGroup.id = dynadim + 'Group'; $(dimGroup).addClass('dimension');
+    dynadimGroup.appendChild(dimGroup);
+var dimText = document.createElementNS(svgNS, 'text');
+var distance = eval('dist' + dimSide + '_' + csID); dimText.id = dynadim + 'Text';
+    $(dimText).addClass('dimension'); $(dimText).addClass('smaller'); $(dimText).attr('fill', optColor);
+    dimGroup.appendChild(dimText);
+
+var dimLine = document.createElementNS(svgNS, 'line');
+    dimLine.id = dynadim + 'Line';
+    dimGroup.appendChild(dimLine);
+    $(dimLine).addClass('opt');
+    $(dimLine).addClass('dimTemp');
+    $(dimLine).attr('stroke', optColor);
+    $(dimLine).attr('fill',optColor);
+    updateOptDim(cs, dimSide, false)
+        return dimGroup; 
+
+} //end makeOptDim
+
+function updateOptDim(obj, sideFirst, useDiff) {
+        var objID = obj.id;
+var par = $(obj).closest('svg').attr('id');
+        var pTUPos = objID.indexOf('_');
+var sID = objID.substring(0, pTUPos);
+var optW = eval('optW_' + sID);
+var optH = eval('optH_' + sID);
+var translateX = eval('translateX_' + objID);
+var translateY = eval('translateY_' + objID); if (typeof translateX === 'undefined') translateX = 0; if
+            (typeof translateY === 'undefined') translateY = 0;
+            
+            //Store the distance.
+var distance=eval('dist' + sideFirst + '_' + objID);
+
+//Store the dynadim group and its contents.
+var groupID=csID + 'Dynadim' +
+        sideFirst + 'Group'; try {
+            var dimGroup = document.getElementById(groupID);
+var dimText = dimGroup.querySelector('text');
+var dimLine = dimGroup.querySelector('line');
+
+//Set the default feet and inches.
+var dimFeet = parseInt(distance);
+var dimFloat = parseFloat(distance);
+var xDiff = 0;
+var yDiff = 0;
+
+//Store the constrained feet, if needed.
+if ((sideFirst==='L' || sideFirst === 'R' ) && incrementX > 0) {
+                //If the x-axis is constrained to increments, use that constraint.
+                var xInc = round(distance / incrementX, 0) * incrementX;
+                var dimFeet = parseInt(xInc);
+                var dimFloat = parseFloat(xInc);
+                var xDiff = xInc - distance;
+            }
+
+else if ((sideFirst === 'T' || sideFirst === 'B') && incrementY > 0) {
+                //If the y-axis is constrained to increments, use that constraint.
+                var yInc = round(distance / incrementY, 0) * incrementY;
+                var dimFeet = parseInt(yInc);
+                var dimFloat = parseFloat(yInc);
+                var yDiff = yInc - distance;
+            }
+
+            //Store the number of inches.
+            var dimDec = dimFloat - dimFeet;
+            var dimInches = round(48 * dimDec, 0) / 4;
+
+            //If the inches round to ≥12, convert them to feet and inches.
+            var dimFeet = dimFeet + Math.floor(dimInches / 12);
+            var dimInches = dimInches % 12;
+
+            //Display the distance in feet and inches.
+            var dimDisplay = dimFeet + '&prime;' + dimInches + '&Prime;';
+            dimText.innerHTML = dimDisplay;
+
+            $(dimText).attr('display', 'auto');
+            if ($(dimText).attr('hasClick') !== 'true') {
+                $(dimText).attr('hasClick', true);
+                $(dimText).click(function () { editDim(dimText) });
+            }
+
+            //The distance should be displayed at the half point of the line.
+            var midX = translateX + (optW / 2);
+            var midY = translateY + (optH / 2);
+            if (useDiff !== true) {
+                //If we don’t need to use the difference, do nothing.
+            }
+
+else if (sideFirst === 'L' || sideFirst === 'R') {
+                //Otherwise, if the current side is horizontal, use the x diff.
+                var distance = distance + xDiff;
+            }
+
+else if (sideFirst === 'T' || sideFirst === 'B') {
+                //Otherwise, if the current side is vertical, use the y diff.
+                var distance = distance + yDiff;
+            }
+            var halfDist = distance / 2;
+
+            //Show the dimension by default.
+            $(dimGroup).attr('display', 'initial');
+
+            //If the dimension is less than 1, hide it.
+            if (distance < 1) { $(dimGroup).attr('display', 'none'); }
+
+else switch (sideFirst) {
+    
+    //Otherwise, set it based on the specified side.
+    case 'L' : $(dimText).attr('x', translateX - halfDist);
+        $(dimLine).attr({ 'x1': translateX - distance, 'x2': translateX });
+        $(dimText).attr('y',midY);
+        $(dimLine).attr('y1', midY);
+        $(dimLine).attr('y2', midY);
+        break;
+
+    case 'R' :
+        $(dimText).attr('x', translateX + optW + halfDist);
+        $(dimLine).attr({'x1': translateX + optW, 'x2': translateX + optW + distance});
+        $(dimText).attr('y', midY); $(dimLine).attr('y1', midY); $(dimLine).attr('y2', midY);
+        break;
+
+    case 'T' : $(dimText).attr('x', midX);
+        $(dimLine).attr('x1', midX);
+        $(dimLine).attr('x2', midX);
+        $(dimText).attr('y', translateY - halfDist);
+       $(dimLine).attr({ 'y1': translateY - distance, 'y2': translateY });
+        break;
+
+    case 'B' : $(dimText).attr('x', midX);
+        $(dimLine).attr('x1', midX);
+        $(dimLine).attr('x2', midX);
+        $(dimText).attr('y', translateY + optH + halfDist);
+        $(dimLine).attr({'y1': translateY + optH, 'y2': translateY + optH + distance});
+        break;
+    }
+
+eval('optW_' + optID + '=' + optW);
+        eval(' optH_' + optID + '=' + optH);
+        eval(' translateX_' + optID + '=' + translateX);
+        eval('translateY_' + optID + ' = ' + translateY);
+        eval(' dist' + sideFirst + '_' + optID + ' = ' + distance);
+    }catch (e) {
+        
+        //If the update fails, do nothing.
+        } //end try
+        
+        //If the active view has any support poles, bring them to the front.
+        
+        $(' #support' + activeView).parent().append($('#support' + activeView));
+    }
+
+function bothSides(obj) {
+        var tPos = obj.id.indexOf('Text')
+        var oSide = obj.id.substring(tPos - 1, tPos);
+        switch (oSide) {
+            case 'L': var aSide = 'R';
+            break;
+            case 'R': var aSide = 'L';
+            break;
+            case 'T': var aSide = 'B';
+                break;
+                case 'B': var aSide = 'T';
+                break;
+        }
+
+altObj = document.getElementById(obj.id.substring(0,tPos - 1) + aSide + 'Text');
+var val = footInchToDec(obj.innerHTML, 3);
+var altVal = footInchToDec(altObj.innerHTML, 3); return [val, altVal];
+    }
+
+function editDim(obj) {
+
+                        //Store the location at which the dimension being edited is displayed.
+var coords=getCoords('',obj);
+var x = coords[0];
+var y = coords[1];
+var val = obj.innerHTML;
+        translateX = $(obj).attr('translateX'); translateY = $(obj).attr('translateY');
+        translate = $(obj).attr('transform');
+
+//Hide the dimension’s uneditable instance.
+        $(obj).css('display', 'none');
+
+//If the div containing the edit box doesn’t exist yet, create it.
+if(document.getElementById('eDiv') === null) {
+            var eDiv = document.createElement('div');
+            eDiv.id = 'eDiv'; $(eDiv).css({
+                'left': x - 56, 'top': y - 24, 'position': 'absolute'
+                , 'z-index': 30
+            }); document.body.appendChild(eDiv);
+        }
+        
+        //If the edit box doesn’t exist yet, create it.
+        if(document.getElementById('eInput') === null){
+            var             eInput = document.createElement('input'); eInput.id = 'eInput'; $(eInput).attr('type', 'text');
+            $(eInput).val(val); eDiv.appendChild(eInput);
+        }
+
+//Either way, activate the edit box.
+        $(eInput).select(); if ($(eInput).attr('hasFO') !== 'true') {
+            
+            //If the user clicks out of the field, revert the change.
+            $(eInput).attr('hasFO', true); $(eInput).focusout(function () {
+                restoreDim(obj, eDiv)
+            });
+        }
+
+if ($(eInput).attr('hasKP') !== 'true') {
+            $(eInput).attr('hasKP',
+                true); $(eInput).keypress(function (evt) {
+                    if (evt.which == 10 || evt.which == 13) {
+                        //If the user presses ⎆ (enter) or ⏎ (return), save the change.
+                        saveDim(obj, eDiv);
+        }
+
+else if (evt.which == 27) {
+
+                        //If the user presses ⎋ (escape), revert the change.
+                        restoreDim(obj, eDiv); }
+}); }
+
+} //end editDim
+
+function restoreDim(objToRestore, objToRemove, isSave) {
+                            
+                            //Remove the temporary object.
+                var par = objToRemove.parentElement;
+                par.removeChild(objToRemove);
+                $(objToRemove).remove;
+
+                //Restore the permanent object.
+                $(objToRestore).css('display', 'initial' );
+            }
+
+function saveDim(objToRestore, objToRemove) {
+                    
+                    //Store the name of the object to restore.
+var restID = objToRestore.id;
+
+//Get the position of the word “text” and parse out the side from immediately before it.
+var tPos = restID.indexOf('Text');
+var oSide = restID.substring(tPos - 1,tPos);
+
+//Store the value from the input field.
+var field=$('input', objToRemove)[0];
+var val = footInchToDec($(field).val());
+
+//If the relevant axis is constrained to increments, use that constraint.
+if((oSide === 'L' || oSide === 'R') && incrementX > 0) {
+                        var val = round(val / incrementX, 0) * incrementX;
+                    }else if ((oSide === 'T' || oSide === 'B') && incrementY > 0) {
+                        var val = round(val / incrementY, 0) * incrementY;
+} //end if
+
+                    objID = '#' + objToRestore.id;
+                    if (val !== undefined) $(objID).val(val);
+
+                    //Store the name of the actual option.
+                    var dynPos = restID.indexOf('Dynadim');
+                    var optPlID = restID.substring(0, dynPos);
+                    var plPos = restID.indexOf('_');
+                    var optID = restID.substring(0, plPos);
+                    var optPl = $('#' + optPlID)[0];
+                    var optPlPar = optPl.parentElement;
+
+                    var vals = bothSides(objToRestore);
+                    var oVal = parseFloat(vals[0]);
+                    var aVal = parseFloat(vals[1]);
+
+                    var fVal = makePrime(val);
+                    var dVal = footInchToDec(fVal, 3);
+
+                    //Make sure the decimal value is constrained to the wall.
+                    var dVal = Math.max(Math.min(dVal, (oVal + aVal)), 0);
+
+                    //Store the difference between the original and final values.
+                    var vDiff = round(dVal - oVal, 10);
+
+                    //Make sure the display version includes an inch mark.
+                    var pPos = fVal.indexOf('\u2032');
+                    var dPPos = fVal.indexOf('\u2033');
+                    if (pPos > 0 && dPPos < 0 && pPos < val.length) var fVal = fVal + '\u2033';
+var aVal = aVal - vDiff;
+
+//Remove the temporary object and restore the permanent
+                    object.restoreDim(objToRestore, objToRemove, true);
+
+//Store the temporary value in the permanent object.
+objToRestore.innerHTML = decToFootInch(fVal, 3, true);
+var         pPos = objToRestore.id.indexOf('Dynadim');
+var optID = objToRestore.id.substring(0, pPos);
+var             tPos = objToRestore.id.indexOf('Text');
+var dimID = objToRestore.id.substring(0, tPos);
+var                 gTarget = document.getElementById(optID + 'Group');
+var lTarget = document.getElementById(dimID
+                                    + 'Line');
+var tTarget = objToRestore;
+
+//Update all option dimensions.
+
+/*If the option is attached to a side, we don’t need dimensions for that side nor its opposite.*/
+var sides=[];
+var attachto = $(gTarget).attr('attachto'); if (attachto.indexOf('left') +
+                        attachto.indexOf('right') >= 0) sides.push('left', 'right');
+                    if (attachto.indexOf('top') + attachto.indexOf('bottom') >= 0) sides.push('top', 'bottom');
+                    for (i = 0; i < sides.length; i++) { var dim = makeOptDim(opt, sides[i]); }
+
+var         tr = $(gTarget).attr('transform'); if (tr === undefined) {
+                            $(gTarget).attr('transform', 'translate(0, 0)');
+var tr = $(gTarget).attr('transform');
+                        }
+
+                    //Get the position of the parentheses.
+var trOPos=tr.indexOf('(');
+var     trCPos = tr.indexOf(')');
+
+//Parse the x and y transforms from between the parentheses.
+var     trDimStr = tr.substring(trOPos + 1, trCPos);
+var trDims = trDimStr.split(', ');
+                    var trDimX = parseFloat(trDims[0]);
+                    var trDimY = parseFloat(trDims[1]);
+
+                    //Update the distance from each wall based on the change.
+                    switch (oSide) {
+                        case ' L': var x = vDiff;
+var y = 0;
+var aDist = 'distL_' + optID;
+var oDist = 'distR_' + optID; break;
+                        case 'R': var x = -vDiff;
+var y = 0;
+var aDist = 'distR_' + optID;
+var oDist = 'distL_' +
+                            optID; break; case 'T': var x = 0;
+var y = vDiff;
+var aDist = 'distT_' + optID;
+var                 oDist = 'distB_' + optID; break; case 'B': var x = 0;
+var y = -vDiff;
+var aDist = 'distB_' +
+                                    optID;
+var oDist = 'distT_' + optID; break;
+                    }
+
+eval(aDist + '+=' + vDiff); eval(oDist + ' -=' + vDiff);
+eval('translateX_' + optID + ' = ' + (trDimX + x));
+eval('translateY_' + optID + ' = ' + (trDimY + y));
+$(gTarget).attr(' transform', 'translate(' + eval('translateX_' + optID) + ', ' + eval(' translateY_' + optID) + ')');
+
+var pTarget = gTarget.closest('svg');
+$(gTarget).trigger('mousedown');
+$(gTarget).trigger('mouseup');
+                
+} //end saveDim
+// END DIMENSIONS FUNCTIONS
+// BEGIN ZOOM FUNCTIONS
+
+function zoomIn(viewName) {
+                    if (activeView !== viewName) {
+                        
+                        // STORE THE ACTIVE VIEW, ETC..
+                        activeView = viewName; activeDiv = document.getElementById('frame' + viewName
+                            + 'Div'); activeSVG = activeDiv.querySelector('svg');
+                        activeGroup = activeSVG.querySelector('g');
+                        activeRoof = activeSVG.querySelector('polygon.roof');
+                        activeWall = activeGroup.querySelector('rect.wall');
+
+// STORE THE ACTIVE WALL’S DIMENSIONS.
+wallL = parseFloat($(activeWall).attr('x')) + mainOffsetX;
+                        wallT = parseFloat($(activeWall).attr('y')) + mainOffsetY;
+                        wallW = parseFloat($(activeWall).attr('width'));
+                        wallH = parseFloat($(activeWall).attr('height')); wallR = wallL + wallW; wallB = wallT +
+                            wallH; pt = activeSVG.createSVGPoint();
+
+//Show all buttons pertaining to detail view.
+                        $('#libButton,#zoomOutButton,.closebtnCir').addClass('visible').removeClass('hidden');
+
+                                //Enable dragging of options.
+                                lockOptions(false);
+
+//Zoom in on the div and disallow further zooming.
+$(activeDiv).addClass('zoomIn').removeClass('zoomOut');
+
+                        //$(activeDiv).off('click');
+
+//Hide all other divs.
+                        $('div.elevation').removeClass('zoomOut narrow');
+                        $('div.elevation').not(activeDiv).css('display', 'none');
+                    }
+                
+
+} //end zoomIn
+
+function zoomOut() {
+                    //Hide all buttons pertaining to detail view.
+                    $('#libButton,#zoomOutButton,.closebtnCir').addClass('hidden').removeClass('visible');
+
+                    //Make sure the library panel is closed.
+                    $('#library').css({ 'width' : 0, 'boxShadow' : 'none'});
+
+//Disable dragging of options.
+lockOptions(true);
+
+//Zoom out of the div and reenable zooming.
+$(activeDiv).addClass('zoomOut').removeClass('zoomIn');
+
+//Clear the active variables and show all elevation divs.
+                activeView = null;
+                activeDiv = null;
+                activeSVG = null;
+                activeGroup = null;
+                activeRoof = null;
+                activeWall = null;
+                $('div.elevation').not(activeDiv).css('display', 'initial');
+            
+
+} //end zoomOut
+
+function makeCloseButton(objID) {
+                
+                //Create the close button for this object.
+
+var closeGroup = document.createElementNS(svgNS, 'g'); $(closeGroup).attr({
+                    'id': objID + 'RemoveGroup', 'draggable': false
+                });
+                
+                $(closeGroup).removeClass('redrag');
+var closeCircle = document.createElementNS(svgNS, 'circle');
+var objID_toPass = objID.replace('Div', ''); $(closeCircle).attr({
+                            'id': csID + 'Remove'
+                            , 'cx': 0, 'cy': 0, 'draggable': false
+                        }); $(closeCircle).addClass('closebtnCir');
+                $(closeCircle).click(function () { removeOption(objID_toPass) });
+var     closeX = document.createElementNS(svgNS, 'text'); $(closeX).attr('id', csID + 'RemoveX'
+                    ); $(closeX).addClass('closebtnCir'); closeX.innerHTML = '&times';
+
+//Attach the close button to its parent.
+closeGroup.appendChild(closeCircle);
+                closeGroup.appendChild(closeX); cGroup.appendChild(closeGroup);
+            }
+
+function
+                lockOptions(boolean) {
+                    if (typeof cSVG !== 'undefined') { //1
+                    
+                    //Store the options to lock or unlock.
+var optMain = $('.optMain'); if (boolean === true) { //2
+
+    //Lock the options.
+                            $('g', $('.option', activeDiv)).attr('draggable', false).removeClass('redrag');
+
+//Remove the custom strokes.
+optMain.css('stroke', '').css({
+                                'stroke-width': ''
+                                , 'stroke-opacity': ''
+                            });
+                        }
+
+else { //2
+
+    //Unlock the options.
+$('g', $('.option', activeDiv)).not('[id*="Dynadim" ]').attr('draggable', true).addClass('redrag');
+
+                                //Restore any custom strokes.
+                                $('.optMain', activeDiv).css({ 'stroke-width' : '4px'
+                                , 'stroke-opacity' : '0.5'
+                        }); for (i = 0; i < optMain.length; i++)
+                            $(optMain[i]).css('stroke', $(optMain[i]).attr('color'));
+                    
+
+} //end if 2
+
+//Update the dimensions’ display values.
+var disp = (boolean === true) ? 'none' : 'initial';
+                $('[id$="DynadimGroup" ]').css('display', disp);
+            
+
+} //end if 1
+}
+
+// END ZOOM FUNCTIONS
+
+// BEGIN OPTIONS FUNCTIONS
+
+var library = document.getElementById('library');
+
+// BEGIN MAKE MAN DOOR
+
+// parameters: id, option number, quantity, width, height
+function makeManDoorElevation(id, optionNumber, quantity, width, height) {
+                var oTable = document.getElementById('libTable');
+var oRow = oTable.insertRow(-1);
+var     cName = 'manDoor' + optionNumber;
+var CName = 'ManDoor' + optionNumber;
+                oRow.id = 'libTableRow' + CName; oRow.parentNode.id = 'libTableSection' + CName;
+
+//Create the enclosing cell, divs, and SVG.
+var oCell = oRow.insertCell(-1); oCell.id = 'libTableCell' + cName;
+oCell.innerHTML = '<div id="' + cName + 'Dims" class="dims" draggable="false">'
+    + decToFootInch(width,0,false) + ' &times; ' + decToFootInch(height,0,false) + ' </div >\r'
+                    + '<div id="' + cName + 'OptCount" class="optCount" draggable="false">' + quantity + '</div >\r'
+                    + '<div id="' + cName + 'Div" class="draggable" draggable="true">\r'
+                    + ' <svg id="' + cName + '" width=' + width + ' height=' + height
+                    + ' class="option" viewBox = "0 0 '+width+' '+height+'" attachto = "bottom" >\r'
+                    + ' <g id="' + cName + 'Group"></g>\r'
+                    + ' </svg>\r'
+                    + '</div>\r';
+
+                var oSVG = document.getElementById(cName);
+                var oGroup = document.getElementById(cName + 'Group');
+                var oDiv = document.getElementById(cName + 'Div');
+
+                oDiv.addEventListener('touchstart', function (event) {
+                    event.preventDefault();
+                    addFromLib(event);
+                }, false);
+
+                oDiv.addEventListener('dragstart', function (event) {
+                    console.log('dragstart_event:' + event);
+                    addFromLib(event);
+                }, false);
+
+                //Draw the door gradient.
+                var oGrad = document.createElementNS(svgNS, 'linearGradient');
+                oGrad.id = cName + 'Grad';
+                $(oGrad).attr('gradientTransform', 'rotate(5)');
+                oGroup.appendChild(oGrad);
+
+                var oStop1 = document.createElementNS(svgNS, 'stop');
+                oStop1.id = cName + 'Stop1';
+                $(oStop1).attr({ 'offset': 0, 'stop-color': 'whiteSmoke' });
+                oGrad.appendChild(oStop1);
+
+                var oStop2 = document.createElementNS(svgNS, 'stop');
+                oStop2.id = cName + 'Stop2';
+                $(oStop2).attr({ 'offset': '30%', 'stop-color': 'white' });
+                oGrad.appendChild(oStop2);
+
+                var oStop3 = document.createElementNS(svgNS, 'stop');
+                oStop3.id = cName + 'Stop3';
+                $(oStop3).attr({ 'offset': '80%', 'stop-color': 'white' });
+                oGrad.appendChild(oStop3);
+
+                var oStop4 = document.createElementNS(svgNS, 'stop');
+                oStop4.id = cName + 'Stop4';
+                $(oStop4).attr({ 'offset': '100%', 'stop-color': 'whiteSmoke' });
+                oGrad.appendChild(oStop4);
+
+                //Draw the actual door.
+                var oDoor = document.createElementNS(svgNS, 'rect');
+                oDoor.id = cName + 'Door';
+                $(oDoor).addClass('optMain');
+                $(oDoor).attr({ 'x': 0, 'y': 0, 'width': width, 'height': height });
+                $(oDoor).css({ 'width': '100%', 'height': '100%', 'fill': 'url(#' + oGrad.id + ')' });
+                oGroup.appendChild(oDoor);
+
+                //Draw the doorknob.
+                var oKnob = document.createElementNS(svgNS, 'circle');
+                oKnob.id = cName + 'Knob';
+                $(oKnob).attr({
+                    'cx': (width - (2.375 / 12)), 'cy': (height - 3), 'r': (1 / 12), 'fill':
+                        'black'
+                });
+                oGroup.appendChild(oKnob);
+
+            
+
+} //end makeManDoor
+
+            // END MAKE MAN DOOR
+
+// BEGIN MAKE GARAGE DOOR
+// parameters: id, option number, quantity, width, height
+
+function makeGarageDoorElevation(id,optionNumber,quantity,width,height){
+
+	var oTable=document.getElementById('libTable');
+	var oRow=oTable.insertRow(-1);
+	var cName='garageDoor'+optionNumber;
+	var CName='GarageDoor'+optionNumber;
+
+	oRow.id='libTableRow'+CName;
+	oRow.parentNode.id='libTableSection'+CName;
+
+	//Create the enclosing cell, divs, and SVG.
+	var oCell=oRow.insertCell(-1);
+	oCell.id='libTableCell'+cName;
+
+	oCell.innerHTML='<div id="'+cName+'Dims" class="dims" draggable="false">'+decToFootInch(width,0,false)+'&times;'+decToFootInch(height,0,false)+'</span></div>\r'
+					+ '<div id="'+cName+'OptCount" class="optCount" draggable="false">'+quantity+'</div>\r'
+					+ '<div id="'+cName+'Div" class="draggable" draggable="true" ondragstart="addFromLib(event)">\r'
+					+ '	<svg id="'+cName+'" width='+width+' height='+height+' class="option" viewBox="0 0 '+width+' '+height+'" attachto="bottom">\r'
+					+ '	<g id="'+cName+'Group"></g>\r'
+					+ '	</svg>\r'
+					+ '</div>\r'
+
+	var oSVG=document.getElementById(cName);
+	var oGroup=document.getElementById(cName+'Group');
+
+	var padWidth=round(1.125/12,1);
+	var padHeight=round(1.5/12,1);
+	var xCount=Math.ceil(width/2);
+	var pWidth=(width-(2*padWidth))/xCount;
+	var yCount=Math.ceil(height/1.75);
+	var pHeight=(height-(2*padHeight))/yCount;
+
+	//Draw the garage door gradient.
+	var oGrad=document.createElementNS(svgNS,'linearGradient');
+	oGrad.id=cName+'Grad';
+	$(oGrad).attr('gradientTransform','rotate(80)');
+	oGroup.appendChild(oGrad);
+	
+	var oStop1=document.createElementNS(svgNS,'stop');
+	oStop1.id=cName+'Stop1';
+	$(oStop1).attr({'offset':0,'stop-color':'whiteSmoke'});
+	oGrad.appendChild(oStop1);
+
+	var oStop2=document.createElementNS(svgNS,'stop');
+	oStop2.id=cName+'Stop2';
+	$(oStop2).attr({'offset':'30%','stop-color':'white'});
+	oGrad.appendChild(oStop2);
+
+	var oStop3=document.createElementNS(svgNS,'stop');
+	oStop3.id=cName+'Stop3';
+	$(oStop3).attr({'offset':'80%','stop-color':'white'});
+	oGrad.appendChild(oStop3);
+
+	var oStop4=document.createElementNS(svgNS,'stop');
+	oStop4.id=cName+'Stop4';
+	$(oStop4).attr({'offset':'100%','stop-color':'whiteSmoke'});
+	oGrad.appendChild(oStop4);
+
+	//Draw the actual door.
+	var oDoor=document.createElementNS(svgNS,'rect');
+	oDoor.id=cName+'Door';
+	$(oDoor).addClass('optMain');
+	$(oDoor).attr({'x':0,'y':0,'width':width,'height':height});
+	$(oDoor).css({'width':'100%','height':'100%','fill':'url(#'+oGrad.id+')'});
+	oGroup.appendChild(oDoor);
+
+	//Draw the horizontal lines separating panels.
+	for (i=1; i<yCount; i++) {
+
+        var oLine = document.createElementNS(svgNS,'line');
+		oLine.id=cName+'Sheet'+i;
+		var h=padHeight+(i*pHeight);
+		$(oLine).attr({'x1':0,'x2':width});
+        $(oLine).attr({'y1':h,'y2':h});
+		$(oLine).addClass('opt');
+        oGroup.appendChild(oLine);
+		
+	} //end for i
+
+	//Draw each panel’s outer rectangle.
+	for (j=0; j<yCount; j++){
+
+		for (k=0; k<xCount; k++) {
+
+			var oPanel=document.createElementNS(svgNS,'rect');
+			oPanel.id=cName+'Panel'+(k+1)+'-'+(j+1);
+			$(oPanel).addClass('optPanel');
+			
+			var w=2*padWidth;
+			var h=2*padHeight;
+
+			$(oPanel).attr({'x':(k*pWidth)+w,'y':(j*pHeight)+h});
+			$(oPanel).css({'width':pWidth-w,'height':pHeight-h,'stroke':'#555','fill':'url("#'+oGrad.id+'")'});
+			oGroup.appendChild(oPanel);
+
+	} } //end for i,j
+
+} //end makeGarageDoor
+
+// END MAKE GARAGE DOOR
+
+
+
+            // BEGIN MAKE WINDOW
+            // parameters: id, option number, quantity, width, height, pane count, grids(boolean)
+            function makeWindowElevation(id, optionNumber, quantity, width, height, panes, hasGrids) {
+
+                var oTable = document.getElementById('libTable');
+                var oRow = oTable.insertRow(-1);
+                var cName = 'window' + optionNumber;
+                var CName = 'Window' + optionNumber;
+
+                oRow.id = 'libTableRow' + CName;
+                oRow.parentNode.id = 'libTableSection' + CName;
+
+                $(oRow).css({ 'width': '100%', 'height': '200px', 'border': 0 });
+
+                var cName = 'window' + optionNumber;
+
+                //Create the tab row.
+                var oCell = oRow.insertCell(-1);
+                oCell.id = 'libTableCell' + cName;
+
+                oCell.innerHTML = '<div id="' + cName + 'Dims" class="dims" draggable="false">'
+                    + decToFootInch(width,0,false)+' &times; ' + decToFootInch(height,0,false)+'</span ></div >\r'
+                    + '<div id="' + cName + 'OptCount" class="optCount" draggable="false">' + quantity + '</div >\r'
+                    + '<div id="' + cName + 'Div" class="draggable" draggable="true" ondragstart = "addFromLib(event)" >\r'
+                    + ' <svg id="' + cName + '" width=' + width + ' height=' + height
+                    + ' class="option" viewBox = "0 0 '+width+' '+height+'" >\r'
+                    + ' <g id="' + cName + 'Group"></g>\r'
+                    + ' </svg>\r'
+                    + '</div>\r';
+
+                var oSVG = document.getElementById(cName);
+                var oGroup = document.getElementById(cName + 'Group');
+
+                var padding = 1.125 / 12;
+                var mPHeight = (height + (padding * (panes - 1))) / panes;
+
+                if (hasGrids == true) {
+
+                    var xCount = Math.round(width);
+                    var pAcross = Math.min(Math.max(3, xCount), 4);
+                    var pWidth = width - (2 * padding) - ((pAcross - 1) * padding / 2);
+                    var pWidth = round(pWidth / pAcross, 1);
+
+                    var yCount = Math.ceil(height / panes);
+                    var pDown = Math.min(Math.max(2, yCount), 4);
+                    var pHeight = mPHeight - (2 * padding) - ((pDown - 1) * padding / 2);
+                    var pHeight = round(pHeight / pDown, 1);
+
+                }
+
+else {
+
+                    var pAcross = 1;
+                    var pWidth = width - (2 * padding);
+                    var pDown = 1;
+                    var pHeight = mPHeight - (2 * padding);
+
+                
+
+} //end hasGrids if
+
+                //Draw the window gradient.
+                var oGrad = document.createElementNS(svgNS, 'linearGradient');
+                oGrad.id = cName + 'Grad';
+                $(oGrad).attr('gradientTransform', 'rotate(45)');
+                oGroup.appendChild(oGrad);
+
+                var oStop1 = document.createElementNS(svgNS, 'stop');
+                oStop1.id = cName + 'Stop1';
+                $(oStop1).attr({ 'offset': '65%', 'stop-color': 'white', 'stop-opacity': 0.15 });
+                oGrad.appendChild(oStop1);
+
+                var oStop2 = document.createElementNS(svgNS, 'stop');
+                oStop2.id = cName + 'Stop2';
+                $(oStop2).attr({ 'offset': '80%', 'stop-color': '#a6d8e3', 'stop-opacity': 0.15 });
+                oGrad.appendChild(oStop2);
+
+                //Draw the actual window.
+                var oWindow = document.createElementNS(svgNS, 'rect');
+                oWindow.id = cName + 'Window';
+                $(oWindow).addClass('optMain');
+
+                $(oWindow).attr({ 'x': 0, 'y': 0, 'width': width, 'height': height });
+                $(oWindow).css({ 'width': '100%', 'height': '100%', 'fill': 'white' });
+                oGroup.appendChild(oWindow);
+
+                //Draw the parts of the window.
+
+
+                //Draw each window pane’s outer rectangle.
+                for (i = 0; i < panes; i++) {
+                    var wPRect = document.createElementNS(svgNS, 'rect');
+                    wPRect.id = cName + 'Pane' + i; $(wPRect).addClass('optPanel'); $(wPRect).attr({
+                        'x':
+                            0, 'y': i * (mPHeight - padding)
+                    }); $(wPRect).css({
+                        'width': width, 'height':
+                            mPHeight, 'stroke': 'black'
+                    }); oGroup.appendChild(wPRect); for (j = 0; j < pDown; j++) {
+                            for (k = 0; k < pAcross; k++) {
+                                var                 wXRect = document.createElementNS(svgNS, 'rect'); wXRect.id = cName + 'Pane' + (i + 1)
+                                    + '.' + (j + 1) + '.' + (k + 1); $(wXRect).attr('x', padding + (k * (pWidth +
+                                        (padding / 2)))); $(wXRect).attr('y', i * (mPHeight - padding) + padding + (j *
+                                            (pHeight + (padding / 2)))); $(wXRect).addClass('optPanel'); $(wXRect).css({
+                                                'width'
+                                                    : pWidth, 'height': pHeight, 'fill': 'url(#' + oGrad.id + ')'
+                                            });
+                                oGroup.appendChild(wXRect);
+                            } //end for k
+                    } //end for j
+                } //end for i 
+
+} //end makeWindow
+
+// END MAKE WINDOW
+
+// END OPTIONS FUNCTIONS
+
+
+
+// BEGIN OPTION MANAGEMENT FUNCTIONS
+                        
+                        function removeOption(objID) {
+
+                                        //Delete the appropriate SVG object.
+var pTarget = $('#' + objID).closest('svg'); $(pTarget).remove();
+
+//Clear the transformation.
+eval('translateX_' + objID + '=undefined'); eval('translateY_' + objID + '=undefined');
+
+//Update the remaining count.
+var oUPos=objID.indexOf('_');
+                            var sID = objID.substring(0, oUPos);
+var countDivName = sID + 'OptCount';
+                            updateCount(countDivName, 1);
+                        }
+
+function updateCount(countDivName, increase) {
+                            //Update the remaining count.
+var countDiv=document.getElementById(countDivName);
+                            var objID = countDivName.replace('OptCount', '');
+var obj = document.getElementById(objID); if (countDiv != null) { //if 1
+var countDivCount = countDiv.innerText;
+                                    document.getElementById(countDivName).innerText = parseInt(countDivCount) +
+                                        parseInt(increase);
+var countDivCount = document.getElementById(countDivName).innerText;
+var objDiv = document.getElementById(obj.id + 'Div');
+
+//If the remaining count is now zero, gray it out and prevent additional dragging.
+if(countDivCount == 0) { //if 2
+                                        $(objDiv).attr('draggable', 'false').removeAttr('ondragstart');;
+                                        $(objDiv).css('opacity', 0.5);
+                                        $(objDiv).removeClass('draggable').addClass('inactive');
+                                    }
+
+else {
+                                        $(objDiv).attr({ 'draggable': 'true', 'ondragstart': 'addFromLib(event)' });
+                                        $(objDiv).css('opacity', 1);
+                                        $(objDiv).addClass('draggable').removeClass('inactive');
+                                    
+
+} //end if 2 
+
+} //end if 1
+}
+                                    function saveOptions() {
+                                        var theBody = $('body')[0];
+//var theBody = document.getElementsByTagName('body');
+var theContent = theBody[0];
+                                        alert(theBody);
+//document.location.href='fmp://$/MKS?script=storerequired&param='
+                                        +required + ',' + reqChecked + ',' + ids;
+                                    }
+
+// END OPTION MANAGEMENT FUNCTIONS
+</script>
+
+
+                                    <!--BEGIN OPTIONS-->
+                                    <div id="library" class="lib">
+                                        <a href="javascript:void(0)" class="closebtn lib"
+                                            onclick="closeLib()">&times;</a>
+
+                                        <table id="libTable">
+                                            <tr id="libTableRow0">
+                                                <td id="libTableCell0" style="height:30px; border:0;" />
+                                            </tr>
+                                        </table>
+
+                                        <script>
+                                                                        makeManDoorElevation(1, 1, 2, 3, 6.7, 0, 0);
+                                                                        makeGarageDoorElevation(1,1,2,7,7);
+                                                                        makeGarageDoorElevation(1,2,1,7,10);
+                                                                        makeWindowElevation(1, 1, 3, 3, 4, 2, 1);
+                                                                        makeWindowElevation(1, 2, 2, 3, 4, 2, 0);
+
+                                                                        //Disable dragging of options.
+                                                                        lockOptions(true);
+                                        </script>
+                                        <!--END OPTIONS-->
+
+</html>

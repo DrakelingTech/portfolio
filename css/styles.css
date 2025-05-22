@@ -109,10 +109,13 @@ body {
   font-family: var(--bs-body-font-family);
   font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
+  letter-spacing: 0.0625em;
   line-height: var(--bs-body-line-height);
   color: var(--bs-body-color);
   text-align: var(--bs-body-text-align);
+  /* background-image:url(../assets/img/tech_bg.jpg) ; */
   background-color: var(--bs-body-bg);
+  background-color: var(--bs-gradient);
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
@@ -290,7 +293,7 @@ sup {
 
 a {
   color: var(--bs-link-color);
-  text-decoration: underline;
+  text-decoration: none;
 }
 
 a:hover {
@@ -369,65 +372,10 @@ img.solution {
   max-height: 40vh;
 }
 
-/* .zin {
-  animation-duration: .75s;
-  animation-name: zoomIn;
-  animation-iteration-count: 1;
-  transform-origin: 50% 50%;
-  animation-timing-function:ease;
-  animation-direction:forwards;
-  animation-fill-mode:forwards;
-}
-
-@keyframes zoomIn {
-  0% {
-    transform: scale(100%);
-    z-index: inherit;
-  }
-  100% {
-    transform: scale(300%);
-    z-index: 10;
-  }
-} */
-
-/* .zout {
-  animation-duration: .75s;
-  animation-name: zoomOut;
-  animation-iteration-count: 1;
-  transform-origin: 50% 50%;
-  animation-timing-function:ease;
-  animation-direction:forwards;
-  animation-fill-mode:forwards;
-}
-
-@keyframes zoomOut {
-  0% {
-    transform: scale(300%);
-    z-index: 10;
-  }
-
-  100% {
-    transform: scale(100%);
-    z-index: inherit;
-  }
-} */
-
-
 .row-container {
   height: fit-content;
 }
 
-/*
-.stack-container {
-  display: flex;
-  position: relative;
-  justify-content: center;
-}
-
-.stack {
-  margin-left: -2vw;
-}
-*/
 .stack-container {
   position: relative;
   display: flex;
@@ -4983,6 +4931,10 @@ fieldset:disabled .btn {
   background-clip: border-box;
   border: var(--bs-card-border-width) solid var(--bs-card-border-color);
   border-radius: var(--bs-card-border-radius);
+  width: 12rem;
+  height: 18rem;
+  margin: 6rem 3rem;
+  text-align: center;
 }
 
 .card>hr {
@@ -5152,6 +5104,12 @@ fieldset:disabled .btn {
   .card-group>.card:not(:first-child) .card-footer {
     border-bottom-left-radius: 0;
   }
+}
+
+.square {
+  display:block;
+  vertical-align:middle;
+  overflow-y: hidden;
 }
 
 .accordion {
@@ -6901,13 +6859,6 @@ fieldset:disabled .btn {
   width: 100%;
 }
 
-.carousel-item img {
-  max-height: 100%;
-  max-width: 100%;
-  object-fit: contain;
-  display: block;
-}
-
 .carousel.pointer-event {
   touch-action: pan-y;
 }
@@ -6936,8 +6887,10 @@ fieldset:disabled .btn {
 }
 
 .carousel-item img {
-  width: 100%;
-  height: auto;
+  /* height: auto; */
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
   display: block;
 }
 
@@ -7134,52 +7087,69 @@ fieldset:disabled .btn {
   color: #000;
 }
 
-
-
-
-// ChatGPT v8
-
-.carousel-wrapper {
-  position: relative;
-  transform: scale(1);
-  z-index: 1;
+.slide {
+  scale(1) translate 0 0;
 }
 
-.zoomed {
+div.zoomed {
   position: fixed;
-  top: 22.5vw;
-  left:15vw;
-  transform-origin: center center;
-  transform:scale(2);
-  //transform:translate(45vw);
-  width: 45vw;
-  height: 45vh;
-  z-index: 1050;
-  filter: drop-shadow(0 0 20px rgb(0, 0, 0, 1));
+  left: 5svw;
+  width: 90svw;
+  top: 7.5svh;
+  height: 90svh;
+  z-index: 1100;
+  /* transform-origin: center center;
+  transform: scale(2) translate:-50% -50%;
+  transition: transform 1s ease, width 1s ease, height 1s ease; */
   border: none;
-  transition: transform 0.5s ease, width 0.5s ease, height 0.5s ease;
+  background: #f8f9fa;
+  /* animation-name: zoomIn; */
 }
 
-.carousel-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  /* background: rgba(0, 0, 0, 0.2); */
-  display: none;
-  z-index: 1050;
-  transition: opacity 0.4s ease;
+.zoomIn {
+  animation-duration: 3s;
+  animation-name: zoomIn;
+  animation-iteration-count: 1;
+  transform-origin: 50% 50%;
+  animation-timing-function: ease;
+  animation-direction: forwards;
+  animation-fill-mode: forwards;
 }
 
-.carousel-overlay.active {
-  display: block;
-  opacity: 0.7;
+@keyframes zoomIn {
+  0% {
+    transform: scale(100%);
+    z-index: inherit;
+  }
+
+  100% {
+    transform: scale(200%);
+    z-index: 1050;
+  }
 }
 
-// end ChatGPT v8
+*/
+/* .zout {
+  animation-duration: .75s;
+  animation-name: zoomOut;
+  animation-iteration-count: 1;
+  transform-origin: 50% 50%;
+  animation-timing-function:ease;
+  animation-direction:forwards;
+  animation-fill-mode:forwards;
+}
 
+@keyframes zoomOut {
+  0% {
+    transform: scale(300%);
+    z-index: 10;
+  }
 
+  100% {
+    transform: scale(100%);
+    z-index: inherit;
+  }
+} */
 
 
 .spinner-grow,
@@ -12982,10 +12952,6 @@ fieldset:disabled .btn {
 
 html {
   scroll-padding-top: calc(4.5rem - 1px);
-}
-
-body {
-  letter-spacing: 0.0625em;
 }
 
 #mainNav {

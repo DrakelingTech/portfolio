@@ -1,0 +1,488 @@
+html{
+	height:100%;
+	width:100%;
+	background-color:white;
+	font:1pt 'Helvetica Neue Light','Helvetica Neue',Helvetica,sans-serif;
+	text-align:center;
+	vertical-align:middle;
+}
+
+body{
+	height:100%;
+	width:100%;
+	background-color:white;
+	background:linear-gradient(#f8f8ff, white 10%, white 95%, #f8f8ff);
+	top:0;
+	bottom:0;
+	left:0;
+	right:0;
+	margin:0;
+	padding:0;
+	border:0;
+	display:block;
+	overflow:hidden;
+	scrolling:no;
+}
+
+div.elevation{
+	position:absolute;
+	display:block;
+	width:50%;
+	height:50%;
+	margin:0;
+	padding:0;
+	border:0;
+	z-index:1;
+	align:xMidYMid;
+}
+
+/*=========BEGIN CSS FOR SVG=========*/
+.closebtn {
+	position:absolute;
+	font:24pt 'Helvetica Neue',Helvetica,sans serif;
+	text-decoration:none;
+	top:0;
+	left:0;
+	padding:10px 25px 40px;
+	color:black;
+	z-index:20;
+	pointer-events:auto;
+}
+
+circle.closebtnCir {
+	r:.75;
+	fill:#999;
+	stroke:#555;
+	stroke-width:3px;
+	padding:15px;
+	pointer-events:auto;
+}
+
+circle.closebtnCir:hover {
+	r:.875;
+	fill:red;
+	stroke:#900;
+	stroke-width:5px;
+	cursor:auto;
+}
+
+text.closebtnCir {
+	font:1.175pt 'Helvetica Neue',Helvetica,sans serif;
+	fill:white;
+	text-anchor:middle;
+	alignment-baseline:middle;
+	baseline-shift:0.1pt;
+	pointer-events:none;
+}
+
+svg {
+	position:relative;
+	pointer-events:auto;
+	vector-effect:non-scaling-stroke;
+}
+
+svg:hover path { fill:#aaa }
+
+svg,rect,circle,line,polygon,polyline{
+	vector-effect:non-scaling-stroke;
+}
+
+svg.elevation {
+	display:inherit;
+	margin:2px;
+	padding:0;
+	background:transparent;
+	width:100%;
+	max-width:calc(100% - 22px);
+	height:calc(100% - 2px);
+	z-index:-1;
+}
+
+.draggable,.redrag { cursor:move; }
+
+svg.option {
+	width:100%;
+	height:200px;
+	border:0;
+	overflow:visible;
+}
+
+rect.optMain{
+	fill:white;
+	stroke:black;
+	stroke-width:1px;
+	pointer-events:auto;
+}
+
+rect.optPanel{
+	fill:transparent;
+	stroke:#999;
+	stroke-width:1px;
+	pointer-events:none;
+}
+
+line.opt{
+	stroke:black;
+	stroke-width:1px;
+	pointer-events:none;
+}
+
+line.dimTemp{
+	stroke:#8c2700;
+	stroke-width:0.5px;
+	stroke-dasharray:6px;
+	stroke-opacity:.5;
+	pointer-events:none;
+}
+
+rect.pole{
+	fill:transparent;
+	stroke-width:0.5px;
+	stroke:black;
+	stroke-dasharray:10,10;
+}
+
+rect.poleVisible{
+	fill:white;
+	stroke-width:1px;
+	stroke:black;
+}
+
+rect.wall {
+	stroke:#8c2700;
+	stroke-width:2px;
+	fill:transparent;
+}
+
+.noClick { pointer-events:none; }
+
+line.wall {
+	stroke:#8c2700;
+	stroke-width:0.5px;
+	pointer-events:none;
+}
+
+line.dimWall {
+	stroke:#8c2700;
+	stroke-width:1px;
+	pointer-events:none;
+}
+
+.roof {
+	stroke:#4267b8;
+	stroke-width:2px;
+	fill:transparent;
+}
+
+line.dimRoof{
+	stroke:#4267b8;
+	stroke-width:1px;
+	pointer-events:none;
+}
+
+line.break{
+	stroke-width:0.05px;
+	vector-effect:none;
+}
+
+p,text { font:1pt 'Helvetica Neue Light','Helvetica Neue',Helvetica,sans-serif; }
+
+text.title {
+	font-size:150%; 
+	text-align:center;
+	vertical-align:baseline;
+	text-anchor:middle;
+	user-select:none;
+	-webkit-user-select:none;
+}
+
+text.dimension {
+	text-anchor:middle;
+	alignment-baseline:middle;
+	user-select:none;
+	/*-webkit-user-select:none;*/
+}
+
+text.smaller {
+	font-size:70%;
+	display:inline-block;
+	padding:5px;
+}
+
+input{
+	width:5em;
+	height:3ex;
+	padding:0 15px;
+	font:22pt 'Helvetica Neue Light','Helvetica Neue',Helvetica,sans-serif;
+	vertical-align:top;	
+}
+
+/*==========END CSS FOR SVG==========*/
+
+
+/*=========BEGIN CSS FOR LIBRARY PANEL=========*/
+div.lib{
+	width:0;
+	height:calc(100% - 20px);
+	position:absolute;
+	border-width:0 0 1px 1px;
+	border-style:solid;
+	border-color:#226;
+	border-radius:6px 0 0 6px;
+	top:0;
+	right:-1px;
+	background:linear-gradient(to right, #69c, #226);
+	z-index:20;
+	box-shadow:none;
+	overflow-x:hidden;
+	overflow-y:scroll;
+	transition:0.5s;
+	padding-top:20px;
+	font-size:24pt;
+	font-weight:300;
+	color:white;
+	pointer-events:auto;
+}
+	
+.libButton{
+	width:48px;
+	height:48px;
+	position:absolute;
+	border:0;
+	top:0;
+	right:0;
+	padding:20px 30px;
+	text-align:right;
+	z-index:20;
+	background:transparent;
+	visibility:hidden;
+	pointer-events:auto;
+}
+
+.closebtn.lib{
+	color:white;
+	left:auto;
+	right:0;
+	float:right;
+	clear:both;
+}
+
+table,tr{
+	width:100%;
+	padding:0 5px 0 0;
+	text-align:center;
+	pointer-events:none;
+}
+
+tr{
+	width:100%;
+	background:transparent;
+	border:0;
+}
+
+td{
+	width:230px;
+	height:200px;
+	padding:10px;
+	left:auto;
+	right:auto;
+	top:auto;
+	bottom:auto;
+	text-align:center;
+	align:center;
+	align-content:center;
+	align-items:center;
+	vertical-align:middle;
+	margin:auto;
+	display:inline-block;
+	border:0;
+	position:relative;
+	pointer-events:none;
+}
+
+div.dims{
+	color:black;
+	font-size:13pt;
+	font-weight:600;
+	background:transparent;
+	width:calc(100% - 40px);
+	height:20px;
+	left:20px;
+	right:20px;
+	bottom:20px;
+	text-align:center;
+	vertical-align:bottom;
+	padding:15px 20px 15px 0;
+	position:absolute;
+	z-index:2;
+	pointer-events:none;
+	-webkit-touch-callout: none;
+	-webkit-user-select:none;
+	user-select:none;
+	overflow:none;
+}
+
+div.optCount{
+	color:white;
+	background:transparent;
+	background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="50%" cy="50%" r="50%" fill="red" stroke="none" stroke-width="none" /></svg>');
+	background-repeat:no-repeat;
+	width:40px;
+	height:40px;
+	right:20px;
+	bottom:-5px;
+	text-align:center;
+	vertical-align:middle;
+	margin:auto auto 5px;
+	padding:1px 0 0;
+	position:absolute;
+	z-index:2;
+	pointer-events:none;
+	-webkit-touch-callout: none;
+	-webkit-user-select:none;
+	user-select:none;
+}
+
+.optCount.inactive{
+	background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><circle cx="50%" cy="50%" r="50%" fill="#999" stroke="none" stroke-width="none" /></svg>');
+	pointer-events:none;
+}
+
+/*==========END CSS FOR LIBRARY PANEL==========*/
+
+
+/*=========BEGIN CSS FOR RESIZE=========*/
+.zoomIn{ animation:zoomIn 0.3s ease forwards; }
+@keyframes zoomIn{
+	from {
+	 width:50%;
+	 height:50%;
+	 max-width:50%;
+	 max-height:50%;
+	 z-index:1;
+	 background:transparent;
+	}
+	to {
+	 width:100%;
+	 height:100%;
+	 max-width:100%;
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+}
+
+.zoomOut{ animation:zoomOut 0.3s ease forwards; }
+@keyframes zoomOut{
+	from {
+	 width:100%;
+	 height:100%;
+	 max-width:100%;
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+	to {
+	 width:50%;
+	 height:50%;
+	 max-width:50%;
+	 max-height:50%;
+	 z-index:1;
+	 background:transparent;
+	}
+}
+
+.wide{ animation:wide 0.3s ease forwards; }
+@keyframes wide{
+	from {
+	 left:0;
+	 right:initial;
+	 width:calc(100% - 255px);
+	 height:100%;
+	 max-width:calc(100% - 255px);
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+	to {
+	 left:0;
+	 right:initial;
+	 width:100%;
+	 height:100%;
+	 max-width:100%;
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+}
+
+.zoomIn.narrow{ animation:narrow 0.3s ease forwards; }
+@keyframes narrow{
+	from {
+	 left:0;
+	 right:initial;
+	 width:100%;
+	 height:100%;
+	 max-width:100%;
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+	to {
+	 left:0;
+	 right:initial;
+	 width:calc(100% - 255px);
+	 height:100%;
+	 max-width:calc(100% - 255px);
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+	}
+}
+
+.zoomOut.narrow{ animation:zoomOutN 0.3s ease forwards; }
+@keyframes zoomOutN{
+	from {
+	 width:calc(100% - 255px);
+	 height:100%;
+	 max-width:calc(100% - 255px);
+	 max-height:100%;
+	 z-index:10;
+	 background-color:white;
+}
+	to {
+	 width:50%;
+	 height:50%;
+	 max-width:50%;
+	 max-height:50%;
+	 z-index:1;
+	 background-color:transparent;
+	}
+}
+/*==========END CSS FOR RESIZE==========*/
+
+
+/*=========BEGIN CSS FOR DISPLAY=========*/
+a:hover{ color:#aaa; }
+
+.display { display:block; }
+.noDisplay { display:none; }
+
+.hidden{
+	animation:hideObject 1s forwards;
+	visibility:hidden;
+}
+@keyframes hideObject{
+	from { opacity:1; }
+	to { opacity:0; }
+}
+
+.visible{
+	visibility:visible;
+	animation:showObject 1s forwards;
+}
+@keyframes showObject{
+	from { opacity:0; }
+	to { opacity:1; }
+}
+/*==========END CSS FOR DISPLAY==========*/

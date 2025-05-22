@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>MKS Floor Plan</title>
+	<script src="js/index.js"></script>
+	<link href="css/styles.css" rel="stylesheet" />
+</head>
+
+<body>
+
+	<!--BEGIN FLOOR PLAN-->
+
+	<div id="values" style="position:fixed; top:20px; left:20px; z-index:100;">
+		<div style="margin:2px 4px;">
+			<p style="font-size:9pt;">Specify the building dimensions.</p>
+		</div>
+		<form id="dimensions">
+			<div>
+				<input type="text" id="length" placeholder="length" style="width:144px; margin:4px;" />
+			</div>
+			<div>
+				<input type="text" id="width" placeholder="width" style="width:144px; margin:4px;" />
+			</div>
+			<div>
+				<input type="text" id="height" placeholder="height" style="width:144px; margin:4px;" />
+			</div>
+			<div>
+				<button
+					style="width:152px; padding: 4px; margin:4px; background-color:aliceblue; border: 1px solid gray; border-radius:5px;">
+					Apply
+				</button>
+			</div>
+		</form>
+	</div>
+
+	<div id="frameDiv" class="elevation">
+
+		<svg id="frame" class="frame" viewBox="-5 -5 54 85">
+			<g id="floorPlan" transform="translate(4.5,5)">
+				<!--TITLE-->
+				<text id="title" text-anchor="middle" x=20 y=32 class="title"></text>
+				<!--WALLS-->
+				<rect id="walls" x=0 y=0 width=0 height=0 class="wall" />
+				<!--ROOF-->
+				<rect id="roof" x=0 y=0 width=0 height=0 class="roof" />
+				<!--RIDGE LINE-->
+				<line id="ridge" x1=0 y1=0 x2=20 y2=0 class="roof" />
+			</g>
+
+			<g id="vDims" transform="translate(0,5)">
+				<!--EAVE DIMENSIONS-->
+				<line x1=1.5 y1=0 x2=3.5 y2=0 class="dimWall" />
+				<line x1=2.5 y1=0 x2=2.5 y2=70 class="dimWall" style="stroke-dasharray:33.5,3;" />
+				<line x1=1.5 y1=70 x2=3.5 y2=70 class="dimWall" />
+				<text x=2.875 y=35 transform="rotate(-90,2.875,35)">
+					70&prime;0&Prime;
+				</text>
+			</g>
+			<g id="hDims" transform="translate(4.5,5)">
+				<!--GABLE WALL DIMENSION-->
+				<line x1=0 y1=70.5 x2=0 y2=72.5 class="dimWall" />
+				<line x1=0 y1=71.5 x2=40 y2=71.5 class="dimWall" style="stroke-dasharray:18.5,3;" />
+				<line x1=40 y1=70.5 x2=40 y2=72.5 class="dimWall" />
+				<text text-anchor="middle" alignment-baseline="middle" x=20.125 y=71.5>
+					40&prime;0&Prime;
+				</text>
+			</g>
+		</svg>
+
+	</div>
+
+	<script>
+		// DEFINE PIERS
+		makePole(.354, 61, .458, .458, 2, 1, '9\u20320\u2033', 1.3, 65.8, 'left')//PIER #2
+		makePole(.354, 52, .458, .458, 3, 1, '9\u20320\u2033', 1.3, 57, 'left')//PIER #3
+		makePole(.354, 43, .458, .458, 4, 1, '9\u20320\u2033', 1.3, 48, 'left')//PIER #4
+		makePole(.354, 36, .458, .458, 5, 1, '7\u20320\u2033', 1.3, 40, 'left')//PIER #5
+		makePole(.354, 27, .458, .458, 6, 1, '9\u20320\u2033', 1.3, 32, 'left')//PIER #6
+		makePole(.354, 18, .458, .458, 7, 1, '9\u20320\u2033', 1.3, 23, 'left')//PIER #7
+		makePole(.354, 9, .458, .458, 8, 1, '9\u20320\u2033', 1.3, 14, 'left')//PIER #8
+		makePole(.354, .354, .458, .458, 9, 1, '9\u20320\u2033', 1.3, 5.2, 'left')//PIER #9
+		makePole(12, .354, .458, .458, 10, 1, '12\u20320\u2033', 6.2, 1.3, 'center')//PIER #10
+		makePole(20, .354, .458, .458, 11, 1, '8\u20320\u2033', 16, 1.3, 'center')//PIER #11
+		makePole(28, .354, .458, .458, 12, 1, '8\u20320\u2033', 24, 1.3, 'center')//PIER #12
+		makePole(39.646, .354, .458, .458, 13, 1, '12\u20320\u2033', 33.8, 1.3, 'center')//PIER #13
+		makePole(39.646, .354, .458, .458, '13b', 1)
+		makePole(39.646, 9, .458, .458, 14, 1, '9\u20320\u2033', 38.7, 5.2, 'right')//PIER #14
+		makePole(39.646, 18, .458, .458, 15, 1, '9\u20320\u2033', 38.7, 14, 'right')//PIER #15
+		makePole(39.646, 27, .458, .458, 16, 1, '9\u20320\u2033', 38.7, 23, 'right')//PIER #16
+		makePole(39.646, 36, .458, .458, 17, 1, '9\u20320\u2033', 38.7, 32, 'right')//PIER #17
+		makePole(39.646, 43, .458, .458, 18, 1, '7\u20320\u2033', 38.7, 40, 'right')//PIER #18
+		makePole(39.646, 52, .458, .458, 19, 1, '9\u20320\u2033', 38.7, 48, 'right')//PIER #19
+		makePole(39.646, 61, .458, .458, 20, 1, '9\u20320\u2033', 38.7, 57, 'right')//PIER #20
+		makePole(39.646, 69.646, .458, .458, 21, 1, '9\u20320\u2033', 38.7, 65.8, 'right')//PIER #21
+		makePole(28, 69.646, .458, .458, 22, 1, '12\u20320\u2033', 33.8, 69.2, 'center')//PIER #22
+		makePole(20, 69.646, .458, .458, 23, 1, '8\u20320\u2033', 24, 69.2, 'center')//PIER #23
+		makePole(12, 69.646, .458, .458, 24, 1, '8\u20320\u2033', 16, 69.2, 'center')//PIER #24
+		makePole(.354, 69.646, .458, .458, 25, 1, '12\u20320\u2033', 6.2, 69.2, 'center')//PIER #25
+
+		document.getElementById('dimensions').addEventListener("submit", makeFloorPlan());
+
+		function makeFloorPlan() {
+			let _width = document.getElementById('width').value;
+			let _height = document.getElementById('length').value;
+
+			console.log(_width + 'px');
+			console.log(_height + 'px');
+
+			document.getElementById('walls').setAttribute('width', document.getElementById('width').value + 'px');
+			document.getElementById('walls').setAttribute('height', document.getElementById('length').value + 'px');
+
+			document.getElementById('roof').setAttribute('width', document.getElementById('width').value + 'px');
+			document.getElementById('roof').setAttribute('height', document.getElementById('length').value + 'px');
+
+			// document.getElementById('ridge').setAttribute('x1', document.getElementById('width').value / 2);
+			// document.getElementById('ridge').setAttribute('y1', document.getElementById('height').value);
+			// document.getElementById('ridge').setAttribute('x2', document.getElementById('width').value / 2);
+			// document.getElementById('ridge').setAttribute('y2', 0);
+
+			// document.getElementById('width').value = _width;
+			// document.getElementById('height').value = _height;
+
+			console.log(document.getElementById('walls').width);
+			console.log(document.getElementById('walls').height);
+
+			return false;
+		}
+
+	</script>
+
+</body>
+
+</html>

@@ -1,0 +1,86 @@
+html,body{
+	background-color:white;
+	width:100%;
+	height:100%;
+	margin:0;
+	padding:0;
+	border:0;
+	overflow:hidden;
+	display:block;
+	scrolling:no;
+	font:0.8pt 'Helvetica Neue Light','Helvetica Neue',Helvetica,sans-serif; 
+	text-align:center;
+	vertical-align:middle;
+	text-anchor:middle;
+	alignment-baseline:middle;
+}
+
+div.elevation{
+	position:absolute;
+	display:block;
+	width:100%;
+	height:100%;
+	max-width:100%;
+	max-height:100%;
+	margin:auto;
+	padding:auto;
+	border:0;
+	z-index:1;
+}
+
+
+/*=========BEGIN CSS FOR SVG=========*/
+svg:hover path { fill:#aaa }
+
+svg.frame {
+	display:inherit;
+	border:5px;
+	padding:0;
+	margin:0;
+	background:transparent;
+	width:calc(100% - 10px);
+	height:calc(100% - 10px); 
+}
+
+rect.pole{
+	stroke:black;
+	stroke-width:0.05px;
+	fill:transparent;
+}
+
+rect.wall {
+	stroke:#8c2700;
+	stroke-width:0.15px;
+	fill:transparent;
+}
+
+line.dimWall {
+	stroke:#8c2700;
+	stroke-width:0.05px;
+}
+
+.roof {
+	stroke:#4267b8;
+	stroke-width:0.15px;
+	fill:transparent;
+}
+
+line.roof {
+	stroke-width:0.05px;
+	stroke-dasharray:0.5,0.5;
+}
+
+line.dimRoof{
+	stroke:#4267b8;
+	stroke-width:0.05px;
+}
+
+.title { font-size:150%; }
+.dim {
+	font-size:75%;
+	width:5px;
+	height:2px;
+}
+/*==========END CSS FOR SVG==========*/
+
+
